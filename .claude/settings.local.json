@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls /Users/kmgay/Desktop/botanical-shelf/*.html)",
+      "Bash(npx create-next-app@latest *)"
+    ]
+  }
+}

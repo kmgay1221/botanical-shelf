@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>植物棚 全画面UIモックアップ — Dark Gallery</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1411; --surface:#171e19; --surface2:#1e2721; --line:#2a352d;
+  --ink:#e8ede9; --ink2:#93a096; --ink3:#5d6a61;
+  --glaucous:#a9c6b4; --water:#7fb2c9; --moon:#b3a8c9; --sun:#d3b47e;
+  --serif:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif;
+  --sans:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0d0b;color:var(--ink);font-family:var(--sans);display:flex;flex-direction:column;align-items:center;padding:20px 12px 60px}
+h1.page{font-family:var(--serif);font-weight:600;font-size:19px;letter-spacing:.12em;margin:6px 0 2px}
+p.pagesub{color:var(--ink2);font-size:12px;margin-bottom:14px;text-align:center;line-height:1.7}
+
+.tabs{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:16px;max-width:560px}
+.tab{background:var(--surface);border:1px solid var(--line);color:var(--ink2);font-size:11.5px;padding:7px 12px;border-radius:999px;cursor:pointer;font-family:var(--sans)}
+.tab.on{background:var(--glaucous);color:#10160f;border-color:var(--glaucous);font-weight:700}
+
+.phone{width:min(390px,100%);background:var(--bg);border:1px solid #2c352e;border-radius:38px;padding:14px 8px 10px;box-shadow:0 30px 70px rgba(0,0,0,.55)}
+.screen{border-radius:26px;overflow:hidden;background:var(--bg);height:740px;display:flex;flex-direction:column;position:relative}
+.status{display:flex;justify-content:space-between;font-size:11px;color:var(--ink3);padding:10px 20px 6px;letter-spacing:.08em;flex:none}
+.view{display:none;flex:1;padding:10px 18px 24px;overflow-y:auto;overscroll-behavior:contain}
+.view.on{display:block}
+.view::-webkit-scrollbar{width:3px}
+.view::-webkit-scrollbar-thumb{background:#2c382f;border-radius:99px}
+
+.eyebrow{font-size:10px;letter-spacing:.28em;color:var(--ink3);text-transform:uppercase}
+.h2{font-family:var(--serif);font-size:22px;font-weight:600;letter-spacing:.06em;margin-top:4px}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:10px;padding:3px 9px;border-radius:999px;border:1px solid var(--line);color:var(--ink2)}
+.chip.water{color:var(--water);border-color:#2c4450}
+.chip.moon{color:var(--moon);border-color:#3a3448}
+.chip.sun{color:var(--sun);border-color:#4a3f2c}
+.badge-play{position:relative}
+.play-num{position:absolute;top:-7px;right:-7px;background:var(--sun);color:#10160f;width:16px;height:16px;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;z-index:5}
+
+.thumb{border-radius:14px;background:radial-gradient(circle at 50% 20%,#243129,#151c17 70%);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.thumb svg{width:78%;height:78%}
+.thumb.dim{filter:grayscale(.5) brightness(.55)}
+.thumb.dim::after{content:"休眠中";position:absolute;bottom:6px;right:8px;font-size:9px;color:var(--moon);letter-spacing:.15em}
+
+.rhythm{display:flex;gap:2px;align-items:flex-end;height:16px}
+.rhythm i{flex:1;background:#33463a;border-radius:1px}
+.rhythm i.now{background:var(--glaucous)}
+.rhythm i.null{background:#2a2537;height:3px !important}
+.rhythm-label{font-size:9px;color:var(--ink3);letter-spacing:.1em;margin-top:3px}
+
+.placard{border-left:2px solid var(--glaucous);padding-left:9px}
+.placard .ja{font-family:var(--serif);font-size:13.5px;line-height:1.35}
+.placard .sci{font-size:10px;color:var(--ink2);font-style:italic;letter-spacing:.03em}
+
+/* home */
+.greet .date{font-size:11px;color:var(--ink2);letter-spacing:.15em}
+.rainbar{margin:12px 0;background:linear-gradient(90deg,#16222b,#151d24);border:1px solid #23394a;border-radius:14px;padding:11px 13px;font-size:11.5px;color:#9cc3d6;display:flex;gap:9px;align-items:center;line-height:1.5}
+.taskcard{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:12px;display:flex;gap:12px;align-items:center;margin-bottom:10px}
+.taskcard .thumb{width:58px;height:58px;flex:none}
+.taskcard .mid{flex:1;min-width:0}
+.taskcard .meta{font-size:10px;color:var(--ink2);margin-top:3px}
+.donebtn{width:44px;height:44px;flex:none;border-radius:50%;border:1.5px solid var(--water);background:transparent;color:var(--water);font-size:17px;cursor:pointer;transition:.25s;position:relative}
+.donebtn.done{background:var(--water);color:#0d1418;border-color:var(--water)}
+.ripple{position:absolute;inset:-1px;border-radius:50%;border:2px solid var(--water);animation:rip .7s ease-out forwards;pointer-events:none}
+@keyframes rip{to{transform:scale(1.9);opacity:0}}
+.sec-title{display:flex;justify-content:space-between;align-items:baseline;margin:16px 0 9px}
+.sec-title b{font-size:12.5px;letter-spacing:.08em}
+.sec-title span{font-size:10px;color:var(--ink3)}
+.streak{display:flex;gap:8px;margin-top:14px}
+.streak .box{flex:1;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.streak .n{font-family:var(--serif);font-size:19px;color:var(--glaucous)}
+.streak .l{font-size:9.5px;color:var(--ink2);letter-spacing:.1em;margin-top:2px}
+
+/* grid */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.gcard{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:9px;position:relative;cursor:pointer}
+.gcard .thumb{width:100%;aspect-ratio:1/1;margin-bottom:9px}
+.gcard .day{position:absolute;top:15px;left:15px;font-size:9px;letter-spacing:.14em;color:#cfd8d1;background:rgba(15,20,17,.55);padding:2px 7px;border-radius:99px;backdrop-filter:blur(3px);z-index:2}
+.gcard .next{margin-top:7px;display:flex;justify-content:space-between;align-items:center}
+.gcard .rhythm{margin-top:8px}
+.filterrow{display:flex;gap:6px;margin:10px 0 12px;overflow-x:auto;padding-bottom:2px}
+.filterrow .chip{flex:none;cursor:pointer}
+.filterrow .chip.on{background:var(--glaucous);color:#10160f;border-color:var(--glaucous);font-weight:700}
+
+/* detail */
+.hero{border-radius:20px;height:230px;position:relative;margin-bottom:14px}
+.hero .day{position:absolute;top:12px;left:12px;font-size:10px;letter-spacing:.16em;color:#d7e0d9;background:rgba(15,20,17,.5);padding:3px 9px;border-radius:99px;z-index:2}
+.d-placard .ja{font-size:19px}
+.d-placard .sci{font-size:11.5px}
+.d-placard .tags{margin-top:8px;display:flex;gap:6px;flex-wrap:wrap}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:13px;margin-top:12px}
+.panel h4{font-size:11px;letter-spacing:.14em;color:var(--ink2);margin-bottom:10px}
+.mg{display:grid;grid-template-columns:repeat(12,1fr);gap:3px;align-items:end;height:64px}
+.mg i{background:#33463a;border-radius:2px}
+.mg i.now{background:var(--glaucous);box-shadow:0 0 10px rgba(169,198,180,.35)}
+.mg i.null{background:#2a2537;height:6px !important}
+.mg-lab{display:grid;grid-template-columns:repeat(12,1fr);gap:3px;margin-top:5px;font-size:8px;color:var(--ink3);text-align:center}
+.mg-note{font-size:10px;color:var(--ink2);margin-top:9px;line-height:1.6}
+.actions{display:flex;gap:8px;margin-top:14px}
+.act{flex:1;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:11px 0;text-align:center;font-size:11.5px;color:var(--ink);cursor:pointer}
+.act.primary{background:var(--water);color:#0d1418;border-color:var(--water);font-weight:700}
+.timeline{margin-top:6px}
+.tl{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:11px;color:var(--ink2);align-items:center}
+.tl .ic{width:26px;height:26px;border-radius:8px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex:none;font-size:12px}
+.tl b{color:var(--ink);font-weight:500}
+
+/* login */
+.login{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;padding:0 10px}
+.logo{width:92px;height:92px;margin-bottom:18px}
+.login h2{font-family:var(--serif);font-size:26px;letter-spacing:.3em;margin-bottom:4px;padding-left:.3em}
+.login .sub{font-size:11px;color:var(--ink2);letter-spacing:.2em;margin-bottom:34px}
+.input{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:14px;color:var(--ink);font-size:13px;padding:13px 14px;font-family:var(--sans)}
+.input::placeholder{color:var(--ink3)}
+.btn{width:100%;background:var(--glaucous);border:none;border-radius:14px;color:#10160f;font-weight:700;font-size:13px;padding:13px;margin-top:10px;cursor:pointer;font-family:var(--sans)}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink2);font-weight:500}
+.finenote{font-size:10px;color:var(--ink3);margin-top:14px;line-height:1.7}
+
+/* add flow */
+.stepper{display:flex;gap:6px;margin:8px 0 16px}
+.step{flex:1;text-align:center;font-size:9.5px;color:var(--ink3);letter-spacing:.06em}
+.step i{display:block;height:3px;border-radius:99px;background:var(--line);margin-bottom:5px;font-style:normal}
+.step.on{color:var(--glaucous)} .step.on i{background:var(--glaucous)}
+.result{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:11px 13px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+.result .src{font-size:9px;color:var(--ink3);letter-spacing:.1em}
+.aibox{border:1px dashed #3a4a3e;border-radius:16px;padding:14px;text-align:center;margin-top:14px}
+.aibox p{font-size:11px;color:var(--ink2);line-height:1.7;margin-bottom:10px}
+.conf{display:inline-flex;gap:5px;align-items:center;font-size:10px;color:var(--sun);border:1px solid #4a3f2c;border-radius:99px;padding:3px 9px}
+.seg{display:flex;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:8px}
+.seg div{flex:1;text-align:center;font-size:11px;padding:10px 0;color:var(--ink2);cursor:pointer;border-right:1px solid var(--line)}
+.seg div:last-child{border-right:none}
+.seg div.on{background:var(--glaucous);color:#10160f;font-weight:700}
+.label{font-size:11px;color:var(--ink2);letter-spacing:.08em;margin:16px 0 6px;display:block}
+.upload{border:1.5px dashed #3a4a3e;border-radius:16px;aspect-ratio:2.6/1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--ink3);font-size:11px;cursor:pointer;text-align:center;line-height:1.6}
+.upload b{color:var(--ink2);font-size:12px}
+
+/* zukan */
+.zukanbar{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 13px;margin:12px 0}
+.zukanbar .row{display:flex;justify-content:space-between;font-size:11px;color:var(--ink2);margin-bottom:6px}
+.zukanbar .bar{height:5px;background:#26302a;border-radius:99px;overflow:hidden}
+.zukanbar .bar i{display:block;height:100%;width:23%;background:linear-gradient(90deg,var(--glaucous),#7ba98d);border-radius:99px}
+.zgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.zcell{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:8px 6px;text-align:center;position:relative}
+.zcell .thumb{width:100%;aspect-ratio:1/1;margin-bottom:6px;border-radius:10px}
+.zcell .nm{font-family:var(--serif);font-size:10.5px;line-height:1.3}
+.zcell .got{position:absolute;top:5px;right:6px;font-size:8.5px;color:var(--glaucous);letter-spacing:.08em}
+.zcell.lock .thumb{filter:brightness(.28) grayscale(1)}
+.zcell.lock .nm{color:var(--ink3)}
+
+/* settings */
+.setrow{display:flex;justify-content:space-between;align-items:center;padding:14px 2px;border-bottom:1px solid var(--line);font-size:12.5px}
+.setrow .d{font-size:10px;color:var(--ink3);margin-top:3px;line-height:1.5}
+.toggle{width:42px;height:24px;border-radius:99px;background:var(--glaucous);position:relative;flex:none;cursor:pointer}
+.toggle::after{content:"";position:absolute;top:3px;right:3px;width:18px;height:18px;border-radius:50%;background:#10160f}
+.toggle.off{background:#2c382f}.toggle.off::after{right:auto;left:3px;background:#5d6a61}
+.iosguide{background:linear-gradient(120deg,#1b2420,#161e22);border:1px solid #2c4450;border-radius:16px;padding:13px;margin-top:16px;font-size:11px;color:#9cc3d6;line-height:1.8}
+
+/* modal */
+.modalwrap{position:absolute;inset:0;background:rgba(6,9,7,.6);backdrop-filter:blur(2px);display:flex;align-items:flex-end;z-index:20}
+.modal{background:var(--surface2);border-top:1px solid var(--line);border-radius:24px 24px 0 0;width:100%;padding:18px 18px 26px}
+.modal h3{font-family:var(--serif);font-size:15px;letter-spacing:.08em;margin-bottom:12px}
+.handle{width:36px;height:4px;border-radius:99px;background:#3a463d;margin:0 auto 14px}
+
+/* nav */
+.nav{flex:none;background:linear-gradient(#0f141100,#0f1411 30%);padding:12px 26px 14px;display:flex;justify-content:space-between;border-top:1px solid #1c241e}
+.nav div{font-size:9.5px;letter-spacing:.12em;color:var(--ink3);text-align:center;cursor:pointer}
+.nav div.on{color:var(--glaucous)}
+.nav i{display:block;font-size:16px;font-style:normal;margin-bottom:3px}
+
+.legend{width:min(520px,100%);margin-top:22px;background:#10150f;border:1px solid #232c25;border-radius:18px;padding:16px 18px}
+.legend h3{font-family:var(--serif);font-size:14px;letter-spacing:.1em;margin-bottom:10px}
+.legend li{font-size:12px;color:var(--ink2);line-height:1.8;list-style:none;display:flex;gap:9px;margin-bottom:6px}
+.legend .n{flex:none;background:var(--sun);color:#10160f;width:17px;height:17px;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:3px}
+</style>
+</head>
+<body>
+
+<h1 class="page">植物棚 — 全画面モックアップ</h1>
+<p class="pagesub">全10画面をタブまたは画面下部のナビで切替。各画面スクロール可。<br>黄色の丸数字＝遊び心要素（下の一覧と対応）</p>
+
+<div class="tabs">
+  <button class="tab" data-v="login">ログイン</button>
+  <button class="tab on" data-v="home">ホーム</button>
+  <button class="tab" data-v="shelf">植物棚</button>
+  <button class="tab" data-v="detail">株の詳細</button>
+  <button class="tab" data-v="record">記録モーダル</button>
+  <button class="tab" data-v="add1">追加① 種検索</button>
+  <button class="tab" data-v="add2">追加② AI生成</button>
+  <button class="tab" data-v="add3">追加③ 株情報</button>
+  <button class="tab" data-v="zukan">図鑑</button>
+  <button class="tab" data-v="set">設定</button>
+</div>
+
+<div class="phone"><div class="screen" id="screen">
+<div class="status"><span>9:41</span><span>⛅ 26° 大阪</span></div>
+
+<!-- LOGIN -->
+<div class="view" id="v-login">
+  <div class="login">
+    <div class="logo">%%LOGO%%</div>
+    <h2>植物棚</h2>
+    <div class="sub">BOTANICAL SHELF — PRIVATE</div>
+    <input class="input" placeholder="メールアドレス">
+    <button class="btn">ログインリンクを送る</button>
+    <div class="finenote">パスワードは不要です。メールに届くリンクを開くとログインできます。<br>このアプリは招待制です。</div>
+  </div>
+</div>
+
+<!-- HOME -->
+<div class="view on" id="v-home">
+  <div class="greet">
+    <div class="date">7月6日 月曜 · DAY 214</div>
+    <div class="h2">今日の水やり <span style="color:var(--glaucous)">3株</span></div>
+  </div>
+  <div class="rainbar badge-play"><span class="play-num">1</span>☔ 屋外の2株は降水確率80%のため、今日は空が水やり担当です</div>
+  <div class="taskcard">
+    <div class="thumb">%%AGAVE1%%</div>
+    <div class="mid">
+      <div class="placard"><div class="ja">白鯨 一号</div><div class="sci">Agave titanota 'Hakugei'</div></div>
+      <div class="meta">大株 · 前回から8日 · 7月の間隔 8日</div>
+    </div>
+    <button class="donebtn badge-play" onclick="doneTap(this)"><span class="play-num">2</span>💧</button>
+  </div>
+  <div class="taskcard">
+    <div class="thumb">%%AGAVE2%%</div>
+    <div class="mid">
+      <div class="placard"><div class="ja">シーザー</div><div class="sci">Agave titanota 'Caesar'</div></div>
+      <div class="meta">中株 · 前回から7日 · 7月の間隔 7日</div>
+    </div>
+    <button class="donebtn" onclick="doneTap(this)">💧</button>
+  </div>
+  <div class="taskcard">
+    <div class="thumb">%%PACHY%%</div>
+    <div class="mid">
+      <div class="placard"><div class="ja">パキプス</div><div class="sci">Operculicarya pachypus</div></div>
+      <div class="meta">中株 · 前回から6日 · 肥料もこの週</div>
+    </div>
+    <button class="donebtn" onclick="doneTap(this)">💧</button>
+  </div>
+  <div class="sec-title"><b>実生トレイ</b><span>毎日チェック</span></div>
+  <div class="taskcard">
+    <div class="thumb">%%SEED%%</div>
+    <div class="mid">
+      <div class="placard"><div class="ja">実生 チタノタ ×12</div><div class="sci">seedling · Day 45</div></div>
+      <div class="meta">実生苗 · 腰水管理中 · 表土が乾いたら霧吹き</div>
+    </div>
+    <button class="donebtn" onclick="doneTap(this)">💧</button>
+  </div>
+  <div class="sec-title"><b>休眠・断水中</b><span>2株</span></div>
+  <div class="taskcard" style="opacity:.75">
+    <div class="thumb dim badge-play"><span class="play-num">3</span>%%KIKKO%%</div>
+    <div class="mid">
+      <div class="placard" style="border-color:var(--moon)"><div class="ja">亀甲竜</div><div class="sci">Dioscorea elephantipes</div></div>
+      <div class="meta">冬型 · 9月頃に目覚め予定</div>
+    </div>
+    <span class="chip moon">🌙 断水</span>
+  </div>
+  <div class="streak badge-play"><span class="play-num">4</span>
+    <div class="box"><div class="n">42日</div><div class="l">水やり忘れゼロ継続</div></div>
+    <div class="box"><div class="n">8 / 34</div><div class="l">アガベ図鑑 収集</div></div>
+  </div>
+</div>
+
+<!-- SHELF -->
+<div class="view" id="v-shelf">
+  <div class="eyebrow">MY COLLECTION</div>
+  <div class="h2">植物棚 <span style="color:var(--glaucous)">12株</span></div>
+  <div class="filterrow">
+    <span class="chip on">すべて</span><span class="chip">アガベ</span><span class="chip">灌木・塊根</span><span class="chip">観葉</span><span class="chip">実生</span><span class="chip moon">休眠中</span>
+  </div>
+  <div class="grid">
+    <div class="gcard" onclick="go('detail')"><span class="day">DAY 214</span><div class="thumb">%%AGAVE1%%</div>
+      <div class="placard"><div class="ja">白鯨 一号</div><div class="sci">Agave titanota</div></div>
+      <div class="rhythm badge-play"><span class="play-num">5</span><i class="null"></i><i class="null"></i><i style="height:35%"></i><i style="height:50%"></i><i style="height:70%"></i><i style="height:70%"></i><i class="now" style="height:100%"></i><i style="height:100%"></i><i style="height:70%"></i><i style="height:50%"></i><i style="height:30%"></i><i class="null"></i></div>
+      <div class="next"><span class="chip water">💧 今日</span></div>
+    </div>
+    <div class="gcard"><span class="day">DAY 96</span><div class="thumb">%%AGAVE3%%</div>
+      <div class="placard"><div class="ja">SAD</div><div class="sci">Agave titanota</div></div>
+      <div class="rhythm"><i class="null"></i><i class="null"></i><i style="height:35%"></i><i style="height:50%"></i><i style="height:70%"></i><i style="height:70%"></i><i class="now" style="height:100%"></i><i style="height:100%"></i><i style="height:70%"></i><i style="height:50%"></i><i style="height:30%"></i><i class="null"></i></div>
+      <div class="next"><span class="chip">あと3日</span></div>
+    </div>
+    <div class="gcard"><span class="day">DAY 388</span><div class="thumb dim">%%KIKKO%%</div>
+      <div class="placard" style="border-color:var(--moon)"><div class="ja">亀甲竜</div><div class="sci">D. elephantipes</div></div>
+      <div class="rhythm"><i style="height:80%"></i><i style="height:80%"></i><i style="height:60%"></i><i style="height:40%"></i><i class="null"></i><i class="null"></i><i class="null now"></i><i class="null"></i><i style="height:40%"></i><i style="height:70%"></i><i style="height:80%"></i><i style="height:80%"></i></div>
+      <div class="rhythm-label">冬型 — 夏は断水</div>
+      <div class="next"><span class="chip moon">🌙 断水中</span></div>
+    </div>
+    <div class="gcard"><span class="day">DAY 45</span><div class="thumb">%%SEED%%</div>
+      <div class="placard"><div class="ja">実生 チタノタ</div><div class="sci">seedling</div></div>
+      <div class="rhythm"><i style="height:40%"></i><i style="height:40%"></i><i style="height:55%"></i><i style="height:70%"></i><i style="height:85%"></i><i style="height:85%"></i><i class="now" style="height:100%"></i><i style="height:100%"></i><i style="height:85%"></i><i style="height:70%"></i><i style="height:55%"></i><i style="height:40%"></i></div>
+      <div class="rhythm-label">実生 — 断水なし</div>
+      <div class="next"><span class="chip water">💧 明日</span></div>
+    </div>
+    <div class="gcard"><span class="day">DAY 132</span><div class="thumb">%%AGAVE2%%</div>
+      <div class="placard"><div class="ja">シーザー</div><div class="sci">A. titanota 'Caesar'</div></div>
+      <div class="rhythm"><i class="null"></i><i class="null"></i><i style="height:35%"></i><i style="height:50%"></i><i style="height:70%"></i><i style="height:70%"></i><i class="now" style="height:100%"></i><i style="height:100%"></i><i style="height:70%"></i><i style="height:50%"></i><i style="height:30%"></i><i class="null"></i></div>
+      <div class="next"><span class="chip water">💧 今日</span></div>
+    </div>
+    <div class="gcard"><span class="day">DAY 260</span><div class="thumb">%%PACHY%%</div>
+      <div class="placard"><div class="ja">パキプス</div><div class="sci">O. pachypus</div></div>
+      <div class="rhythm"><i class="null"></i><i class="null"></i><i class="null"></i><i style="height:40%"></i><i style="height:65%"></i><i style="height:80%"></i><i class="now" style="height:100%"></i><i style="height:100%"></i><i style="height:70%"></i><i style="height:40%"></i><i class="null"></i><i class="null"></i></div>
+      <div class="rhythm-label">落葉後は断水</div>
+      <div class="next"><span class="chip water">💧 今日</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL -->
+<div class="view" id="v-detail">
+  <div class="hero thumb"><span class="day">DAY 214 · 2025.12.04 お迎え</span>%%AGAVE1%%</div>
+  <div class="d-placard placard">
+    <div class="ja">白鯨 一号</div>
+    <div class="sci">Agave titanota 'Hakugei'</div>
+    <div class="tags"><span class="chip">大株 · 6号</span><span class="chip">ベランダ</span><span class="chip water">次回 今日</span><span class="chip sun">図鑑 収集済</span></div>
+  </div>
+  <div class="panel badge-play"><span class="play-num">5</span>
+    <h4>年間の水やりリズム（マスタ準拠 / 大株）</h4>
+    <div class="mg">
+      <i class="null"></i><i class="null"></i><i style="height:35%"></i><i style="height:52%"></i><i style="height:72%"></i><i style="height:72%"></i><i class="now" style="height:100%"></i><i style="height:100%"></i><i style="height:72%"></i><i style="height:52%"></i><i style="height:30%"></i><i class="null"></i>
+    </div>
+    <div class="mg-lab"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span><span>11</span><span>12</span></div>
+    <div class="mg-note">7月は <b style="color:var(--glaucous)">8日間隔</b>。12〜2月は断水。用土が完全に乾いてから2〜3日待って灌水。梅雨は雨ざらしを避ける。</div>
+  </div>
+  <div class="actions">
+    <button class="act primary" onclick="go('record')">💧 水やり</button>
+    <button class="act">🌱 肥料</button>
+    <button class="act">💡 照射</button>
+  </div>
+  <div class="sec-title" style="margin-top:18px"><b>成長ギャラリー</b><span class="badge-play" style="position:relative;padding-right:20px">比較<span class="play-num">6</span></span></div>
+  <div style="display:flex;gap:8px">
+    <div class="thumb" style="flex:1;aspect-ratio:1">%%AGAVE_S%%</div>
+    <div class="thumb" style="flex:1;aspect-ratio:1">%%AGAVE1%%</div>
+  </div>
+  <div class="sec-title"><b>記録タイムライン</b><span>直近</span></div>
+  <div class="timeline">
+    <div class="tl"><div class="ic">💧</div><div><b>水やり</b> · 6月28日 · たっぷり</div></div>
+    <div class="tl"><div class="ic">🌱</div><div><b>肥料</b> · 6月15日 · 液肥2000倍</div></div>
+    <div class="tl"><div class="ic">📷</div><div><b>写真</b> · 6月10日 · 新葉2枚展開</div></div>
+    <div class="tl"><div class="ic">💧</div><div><b>水やり</b> · 6月20日</div></div>
+  </div>
+</div>
+
+<!-- RECORD MODAL -->
+<div class="view" id="v-record" style="padding:0">
+  <div style="filter:blur(2px) brightness(.5);padding:10px 18px;pointer-events:none">
+    <div class="hero thumb" style="height:180px">%%AGAVE1%%</div>
+    <div class="d-placard placard"><div class="ja">白鯨 一号</div><div class="sci">Agave titanota 'Hakugei'</div></div>
+  </div>
+  <div class="modalwrap"><div class="modal">
+    <div class="handle"></div>
+    <h3>記録する — 白鯨 一号</h3>
+    <div class="seg"><div class="on">💧 水やり</div><div>🌱 肥料</div><div>💡 照射</div></div>
+    <span class="label">日時</span>
+    <input class="input" value="今日 9:41">
+    <span class="label">写真（任意）</span>
+    <div class="upload" style="aspect-ratio:4/1"><b>＋ 写真を追加</b></div>
+    <span class="label">メモ（任意）</span>
+    <input class="input" placeholder="例: 鉢底から流れるまでたっぷり">
+    <button class="btn" onclick="alert('記録しました（デモ）')">💧 水やりを記録</button>
+  </div></div>
+</div>
+
+<!-- ADD 1 -->
+<div class="view" id="v-add1">
+  <div class="eyebrow">ADD PLANT</div>
+  <div class="h2">株を追加</div>
+  <div class="stepper">
+    <div class="step on"><i></i>1 種をえらぶ</div>
+    <div class="step"><i></i>2 育て方を確認</div>
+    <div class="step"><i></i>3 株の情報</div>
+  </div>
+  <input class="input" value="ハデス" style="margin-bottom:12px">
+  <div class="result" onclick="go('add3')">
+    <div class="placard"><div class="ja">ハデス（黒帝斬）</div><div class="sci">Agave titanota 'Hades'</div></div>
+    <span class="src">マスタ収録</span>
+  </div>
+  <div class="result" onclick="go('add3')">
+    <div class="placard"><div class="ja">チタノタ（基準種）</div><div class="sci">Agave titanota</div></div>
+    <span class="src">マスタ収録</span>
+  </div>
+  <div class="aibox badge-play"><span class="play-num">7</span>
+    <p>お探しの種が見つかりませんか？<br>AIが育て方を調査して、月別の水やりリズムを作成します。</p>
+    <button class="btn ghost" style="width:auto;padding:10px 22px" onclick="go('add2')">🔍 AIに調べてもらう</button>
+  </div>
+</div>
+
+<!-- ADD 2 -->
+<div class="view" id="v-add2">
+  <div class="eyebrow">ADD PLANT</div>
+  <div class="h2">株を追加</div>
+  <div class="stepper">
+    <div class="step"><i></i>1 種をえらぶ</div>
+    <div class="step on"><i></i>2 育て方を確認</div>
+    <div class="step"><i></i>3 株の情報</div>
+  </div>
+  <div class="panel" style="margin-top:4px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+      <div class="placard"><div class="ja">コミフォラ・モンストローサ</div><div class="sci">Commiphora monstruosa</div></div>
+      <span class="conf">AI生成 · 確度 中</span>
+    </div>
+    <div class="mg" style="margin-top:14px;height:52px">
+      <i class="null"></i><i class="null"></i><i class="null"></i><i style="height:40%"></i><i style="height:60%"></i><i style="height:80%"></i><i class="now" style="height:100%"></i><i style="height:100%"></i><i style="height:70%"></i><i style="height:40%"></i><i class="null"></i><i class="null"></i>
+    </div>
+    <div class="mg-lab"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span><span>11</span><span>12</span></div>
+    <div class="mg-note">夏型・落葉性。マダガスカル原産。葉が落ちたら断水に移行。実生・子株・中株・大株の4サイズ分を生成済み（上は中株）。</div>
+  </div>
+  <div class="seg" style="margin-top:10px">
+    <div>実生苗</div><div>子株</div><div class="on">中株</div><div>大株</div>
+  </div>
+  <div class="finenote" style="text-align:center">サイズを切り替えるとリズムのプレビューが変わります</div>
+  <button class="btn" onclick="go('add3')">この内容で登録する</button>
+  <button class="btn ghost">条件を変えて再生成</button>
+</div>
+
+<!-- ADD 3 -->
+<div class="view" id="v-add3">
+  <div class="eyebrow">ADD PLANT</div>
+  <div class="h2">株を追加</div>
+  <div class="stepper">
+    <div class="step"><i></i>1 種をえらぶ</div>
+    <div class="step"><i></i>2 育て方を確認</div>
+    <div class="step on"><i></i>3 株の情報</div>
+  </div>
+  <span class="label">写真</span>
+  <div class="upload badge-play"><span class="play-num">8</span><b>＋ タップして写真を追加</b><span>写真を入れるまでは種のイラストが表示されます</span></div>
+  <span class="label">ニックネーム</span>
+  <input class="input" placeholder="例: ハデス一号">
+  <span class="label">株サイズ</span>
+  <div class="seg"><div>実生苗</div><div>子株</div><div class="on">中株</div><div>大株</div></div>
+  <div class="finenote">実生苗: 播種〜1年 / 子株: 2.5号以下 / 中株: 3〜5号 / 大株: 6号〜<br>植え替えや成長に合わせて、あとから変更できます</div>
+  <span class="label">置き場所</span>
+  <div class="seg"><div>室内</div><div class="on">ベランダ・軒下</div><div>屋外 雨ざらし</div></div>
+  <div class="finenote">屋外の場合、雨の日は水やり通知をスキップします</div>
+  <span class="label">メモ（任意）</span>
+  <input class="input" placeholder="用土、購入元など">
+  <button class="btn">🪴 植物棚に迎える</button>
+</div>
+
+<!-- ZUKAN -->
+<div class="view" id="v-zukan">
+  <div class="eyebrow">ENCYCLOPEDIA</div>
+  <div class="h2">図鑑</div>
+  <div class="filterrow">
+    <span class="chip on">アガベ 8/34</span><span class="chip">灌木・塊根 2/18</span><span class="chip">ユーフォルビア 0/6</span><span class="chip">観葉 1/10</span>
+  </div>
+  <div class="zukanbar badge-play"><span class="play-num">4</span>
+    <div class="row"><span>アガベ図鑑 収集率</span><span>8 / 34種</span></div>
+    <div class="bar"><i></i></div>
+  </div>
+  <div class="zgrid">
+    <div class="zcell"><span class="got">✓ 収集</span><div class="thumb">%%AGAVE1%%</div><div class="nm">白鯨</div></div>
+    <div class="zcell"><span class="got">✓ 収集</span><div class="thumb">%%AGAVE2%%</div><div class="nm">シーザー</div></div>
+    <div class="zcell"><span class="got">✓ 収集</span><div class="thumb">%%AGAVE3%%</div><div class="nm">SAD</div></div>
+    <div class="zcell lock"><div class="thumb">%%AGAVE1%%</div><div class="nm">雪豹</div></div>
+    <div class="zcell lock"><div class="thumb">%%AGAVE2%%</div><div class="nm">大白鯊</div></div>
+    <div class="zcell lock"><div class="thumb">%%AGAVE3%%</div><div class="nm">氷河</div></div>
+    <div class="zcell lock"><div class="thumb">%%AGAVE1%%</div><div class="nm">皇冠</div></div>
+    <div class="zcell lock"><div class="thumb">%%AGAVE2%%</div><div class="nm">緑幽霊</div></div>
+    <div class="zcell lock"><div class="thumb">%%AGAVE3%%</div><div class="nm">魔丸</div></div>
+  </div>
+  <div class="finenote" style="text-align:center;margin-top:12px">株を迎えると図鑑が埋まります。未収集はシルエット表示。<br>図鑑のセルから種の育て方（月別リズム）も閲覧できます。</div>
+</div>
+
+<!-- SETTINGS -->
+<div class="view" id="v-set">
+  <div class="eyebrow">SETTINGS</div>
+  <div class="h2">設定</div>
+  <div style="margin-top:8px">
+    <div class="setrow"><div>Kuma<div class="d">kuma@example.com</div></div><span class="chip">プロフィール</span></div>
+    <div class="setrow"><div>水やり通知<div class="d">今日の対象株をまとめて1通で通知</div></div><div class="toggle" onclick="this.classList.toggle('off')"></div></div>
+    <div class="setrow"><div>通知時刻</div><span class="chip">朝 7:00 ▾</span></div>
+    <div class="setrow"><div>地域<div class="d">雨スキップ・気温表示に使用</div></div><span class="chip">大阪市 ▾</span></div>
+    <div class="setrow"><div>断水明け通知<div class="d">休眠明けの月初に「目覚めました」をお知らせ</div></div><div class="toggle" onclick="this.classList.toggle('off')"></div></div>
+    <div class="setrow"><div>マスタデータ管理<div class="d">管理者のみ · 種の月別リズムを編集</div></div><span class="chip sun">ADMIN</span></div>
+  </div>
+  <div class="iosguide">📱 <b>iPhoneをお使いの方へ</b><br>Safariの共有メニューから「ホーム画面に追加」すると、アプリとして起動でき、水やり通知を受け取れるようになります。</div>
+  <button class="btn ghost" style="margin-top:16px">ログアウト</button>
+</div>
+
+<div class="nav">
+  <div data-v="home" class="on"><i>💧</i>今日</div>
+  <div data-v="shelf"><i>🪴</i>植物棚</div>
+  <div data-v="add1"><i>＋</i>追加</div>
+  <div data-v="zukan"><i>📖</i>図鑑</div>
+  <div data-v="set"><i>⚙</i>設定</div>
+</div>
+</div></div>
+
+<div class="legend">
+  <h3>遊び心の提案（丸数字と対応）</h3>
+  <li><span class="n">1</span>雨の日は「今日は空が水やり担当」— 屋外株の雨スキップを演出込みで通知</li>
+  <li><span class="n">2</span>水やり完了で水紋（リップル）が広がる演出。ホームで実際に押せます</li>
+  <li><span class="n">3</span>休眠中の株はモノクロに沈み🌙バッジ。断水明けに「目覚めました」通知（設定でON/OFF）</li>
+  <li><span class="n">4</span>図鑑コレクション — 迎えた種が埋まり、未収集はシルエット。収集率バーとストリーク</li>
+  <li><span class="n">5</span>署名要素「年間水やりリズムバー」— 今月が光る。冬型は夏が欠け、実生は途切れない</li>
+  <li><span class="n">6</span>成長ギャラリー — お迎え時と現在のビフォーアフター比較（DAY表示）</li>
+  <li><span class="n">7</span>AI司書 — マスタにない種は、AIが調べて月別リズムを作成し図鑑に追加</li>
+  <li><span class="n">8</span>写真を入れるまでは種のイラスト（シルエット）がプレースホルダーとして表示</li>
+</div>
+
+<script>
+function agave(color1,color2,leaves,spread){
+  let paths='';
+  for(let i=0;i<leaves;i++){
+    const a=(360/leaves)*i;
+    paths+=`<path d="M0,-6 C ${spread},-30 ${spread*0.55},-72 0,-92 C ${-spread*0.55},-72 ${-spread},-30 0,-6 Z" fill="url(#g)" stroke="${color2}" stroke-width="1.2" transform="rotate(${a})" opacity="${0.82+0.18*Math.sin(i)}"/>`;
+  }
+  return `<svg viewBox="-100 -100 200 200"><defs><radialGradient id="g" cx="50%" cy="85%"><stop offset="0%" stop-color="${color1}"/><stop offset="100%" stop-color="${color2}"/></radialGradient></defs><g>${paths}</g><circle r="7" fill="${color1}"/></svg>`;
+}
+const variants={
+  LOGO:agave('#a9c6b4','#39584a',9,28),
+  AGAVE1:agave('#b7d2c1','#3f5c4b',12,26),
+  AGAVE2:agave('#a3c4b8','#35544a',10,30),
+  AGAVE3:agave('#9db8cf','#3a4f66',14,22),
+  AGAVE_S:agave('#b7d2c1','#3f5c4b',7,30),
+  SEED:agave('#c4d8a8','#4c5c38',5,34),
+  PACHY:`<svg viewBox="-100 -100 200 200"><path d="M-16,90 C-30,30 -22,-10 -6,-38 C-2,-46 2,-46 6,-38 C22,-10 30,30 16,90 Z" fill="#6b5844" stroke="#3d3225" stroke-width="2"/><g stroke="#5a7a52" stroke-width="3" fill="none"><path d="M0,-40 C-14,-58 -30,-64 -46,-62"/><path d="M0,-40 C12,-60 28,-68 44,-64"/><path d="M-2,-52 C-6,-70 -2,-84 6,-92"/></g><g fill="#7fa06f">${[...Array(14)].map((_,i)=>`<circle cx="${-46+i*7}" cy="${-62-Math.sin(i)*14}" r="3.4"/>`).join('')}</g></svg>`,
+  KIKKO:`<svg viewBox="-100 -100 200 200"><circle cx="0" cy="30" r="52" fill="#8a7a5f"/><g stroke="#4f452f" stroke-width="2.5" fill="#a08e6d">${[[-20,8],[16,4],[-2,34],[-36,34],[30,36],[-16,58],[18,60]].map(p=>`<polygon points="${p[0]-14},${p[1]} ${p[0]},${p[1]-13} ${p[0]+14},${p[1]} ${p[0]},${p[1]+13}"/>`).join('')}</g><path d="M0,-20 C-4,-46 6,-62 2,-84" stroke="#5a6b4a" stroke-width="3" fill="none"/><path d="M2,-84 l-12,-8 M2,-84 l12,-6" stroke="#5a6b4a" stroke-width="3"/></svg>`
+};
+document.body.innerHTML=document.body.innerHTML.replace(/%%(\w+)%%/g,(_,k)=>variants[k]||'');
+
+function go(v){
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x.dataset.v===v));
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('on'));
+  const el=document.getElementById('v-'+v);
+  if(el){el.classList.add('on');el.scrollTop=0}
+  document.querySelectorAll('.nav div').forEach(x=>x.classList.toggle('on',x.dataset.v===v));
+}
+window.go=go;
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>go(t.dataset.v)));
+document.querySelectorAll('.nav div').forEach(t=>t.addEventListener('click',()=>go(t.dataset.v)));
+
+window.doneTap=function(b){
+  if(b.classList.contains('done'))return;
+  b.classList.add('done');b.innerHTML='✓';
+  const r=document.createElement('span');r.className='ripple';b.appendChild(r);
+  setTimeout(()=>r.remove(),750);
+};
+</script>
+</body>
+</html>
