@@ -1,16 +1,10 @@
 {
-  "crons": [
-    {
-      "path": "/api/cron/hourly-notify",
-      "schedule": "0 * * * *"
-    }
-  ],
   "headers": [
     {
       "source": "/sw.js",
       "headers": [
         { "key": "Service-Worker-Allowed", "value": "/" },
-        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
+        { "key": "Cache-Control", "value": "no-cache" }
       ]
     }
   ]
