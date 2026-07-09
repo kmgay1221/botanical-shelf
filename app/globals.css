@@ -1,26 +1,76 @@
 @import "tailwindcss";
 
+/* ── Design Tokens ─────────────────────────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg:       #0f1411;
+  --surface:  #171e19;
+  --surface2: #1e2721;
+  --line:     #2a352d;
+  --ink:      #e8ede9;
+  --ink2:     #93a096;
+  --ink3:     #5d6a61;
+  --glaucous: #a9c6b4;
+  --water:    #7fb2c9;
+  --moon:     #b3a8c9;
+  --sun:      #d3b47e;
 }
 
+/* ── Tailwind v4 Theme Extension ────────────────────────────── */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg:       var(--bg);
+  --color-surface:  var(--surface);
+  --color-surface2: var(--surface2);
+  --color-line:     var(--line);
+  --color-ink:      var(--ink);
+  --color-ink2:     var(--ink2);
+  --color-ink3:     var(--ink3);
+  --color-glaucous: var(--glaucous);
+  --color-water:    var(--water);
+  --color-moon:     var(--moon);
+  --color-sun:      var(--sun);
+  --font-serif: var(--font-shippori), "Hiragino Mincho ProN", "Yu Mincho", serif;
+  --font-sans:  var(--font-zen-kaku), "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ── Base ───────────────────────────────────────────────────── */
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ── Scrollbar ──────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 3px; height: 3px; }
+::-webkit-scrollbar-thumb { background: #2c382f; border-radius: 99px; }
+
+/* ── Focus ring ─────────────────────────────────────────────── */
+:focus-visible {
+  outline: 1.5px solid var(--glaucous);
+  outline-offset: 2px;
+}
+
+/* ── Ripple animation ───────────────────────────────────────── */
+@keyframes rip {
+  to { transform: scale(1.9); opacity: 0; }
+}
+.ripple-ring {
+  position: absolute;
+  inset: -1px;
+  border-radius: 50%;
+  border: 2px solid var(--water);
+  animation: rip 0.7s ease-out forwards;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ripple-ring { animation: none; }
+}
+
+/* ── Safe area padding for PWA ──────────────────────────────── */
+.safe-bottom {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
 }

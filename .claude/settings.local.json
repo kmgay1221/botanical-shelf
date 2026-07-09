@@ -2,7 +2,13 @@
   "permissions": {
     "allow": [
       "Bash(ls /Users/kmgay/Desktop/botanical-shelf/*.html)",
-      "Bash(npx create-next-app@latest *)"
+      "Bash(npx create-next-app@latest *)",
+      "Bash(npm install *)",
+      "Bash(npm test *)",
+      "Bash(npm run *)",
+      "Bash(git init *)",
+      "Bash(git add *)",
+      "Bash(git commit *)"
     ]
   }
 }

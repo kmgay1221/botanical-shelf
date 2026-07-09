@@ -1,0 +1,25 @@
+{
+  "name": "植物棚",
+  "short_name": "植物棚",
+  "description": "植物の水やり管理アプリ",
+  "start_url": "/home",
+  "display": "standalone",
+  "background_color": "#0f1411",
+  "theme_color": "#0f1411",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["lifestyle", "utilities"]
+}

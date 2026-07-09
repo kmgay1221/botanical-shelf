@@ -1,0 +1,42 @@
+[
+  {
+    "name_ja": "アガベ・チタノタ（基準種）",
+    "name_scientific": "Agave titanota",
+    "aliases": ["チタノタ", "オテロイ"],
+    "category": "agave",
+    "growth_type": "summer",
+    "watering_intervals": {
+      "seedling": {"1":20,"2":20,"3":14,"4":10,"5":7,"6":7,"7":5,"8":5,"9":7,"10":10,"11":14,"12":20},
+      "small":    {"1":null,"2":null,"3":21,"4":14,"5":10,"6":10,"7":7,"8":7,"9":10,"10":14,"11":25,"12":null},
+      "medium":   {"1":null,"2":null,"3":25,"4":18,"5":12,"6":12,"7":8,"8":8,"9":12,"10":18,"11":30,"12":null},
+      "large":    {"1":40,"2":40,"3":30,"4":21,"5":14,"6":14,"7":10,"8":10,"9":14,"10":21,"11":35,"12":40}
+    },
+    "dormancy_note": "最低気温5°C以下の期間は断水推奨",
+    "fertilizer_interval_days": 30,
+    "fertilizer_months": [4, 5, 6, 9, 10],
+    "min_temp_celsius": 0,
+    "care_notes": "用土が完全に乾いてから2〜3日待って灌水。梅雨は雨ざらしを避ける",
+    "confidence": "high",
+    "reference_note": "複数の国内育成家の栽培記録に基づく"
+  },
+  {
+    "name_ja": "亀甲竜",
+    "name_scientific": "Dioscorea elephantipes",
+    "aliases": ["ディオスコレア", "エレファンティペス"],
+    "category": "caudex_shrub",
+    "growth_type": "winter",
+    "watering_intervals": {
+      "seedling": {"1":10,"2":10,"3":14,"4":14,"5":21,"6":null,"7":null,"8":null,"9":14,"10":10,"11":10,"12":10},
+      "small":    {"1":14,"2":14,"3":21,"4":21,"5":30,"6":null,"7":null,"8":null,"9":21,"10":14,"11":14,"12":14},
+      "medium":   {"1":21,"2":21,"3":30,"4":30,"5":null,"6":null,"7":null,"8":null,"9":30,"10":21,"11":21,"12":21},
+      "large":    {"1":30,"2":30,"3":40,"4":40,"5":null,"6":null,"7":null,"8":null,"9":40,"10":30,"11":30,"12":30}
+    },
+    "dormancy_note": "夏（5〜8月）は完全断水。落葉後に断水を開始し、秋の気温低下とともに再開",
+    "fertilizer_interval_days": 30,
+    "fertilizer_months": [10, 11, 1, 2],
+    "min_temp_celsius": 0,
+    "care_notes": "冬型コーデックス。葉が展開したら灌水再開、落葉したら断水",
+    "confidence": "high",
+    "reference_note": "冬型コーデックスの標準管理に基づく"
+  }
+]
