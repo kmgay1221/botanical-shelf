@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 
 // アガベロゼット SVG（モックの logo に対応）
 function AgaveLogo() {
@@ -12,7 +13,6 @@ function AgaveLogo() {
       className="w-[92px] h-[92px] mb-[18px]"
       aria-hidden="true"
     >
-      {/* ロゼット形状 */}
       {[0, 45, 90, 135, 180, 225, 270, 315].map((deg, i) => (
         <ellipse
           key={i}
@@ -27,43 +27,93 @@ function AgaveLogo() {
   );
 }
 
+type Step = "email" | "code" | "sent";
+
 export default function LoginPage() {
+  const router = useRouter();
+  const [step, setStep] = useState<Step>("email");
   const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"idle" | "loading" | "sent" | "denied">("idle");
+  const [code, setCode] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const codeRef = useRef<HTMLInputElement>(null);
+
   const allowedEmails = (process.env.NEXT_PUBLIC_ALLOWED_EMAILS ?? "")
     .split(",")
     .map((e) => e.trim().toLowerCase())
     .filter(Boolean);
 
-  async function handleSubmit(e: React.FormEvent) {
+  // ── ステップ1: メールアドレスを送信 ─────────────────────────────
+  async function handleSendCode(e: React.FormEvent) {
     e.preventDefault();
     const normalized = email.trim().toLowerCase();
 
-    // 招待制チェック（サーバー側でも /api/auth/send-link で二重確認）
+    // E15: 招待制チェック
     if (allowedEmails.length > 0 && !allowedEmails.includes(normalized)) {
-      setStatus("denied");
+      setError("このアプリは招待制です。");
       return;
     }
 
-    setStatus("loading");
+    setLoading(true);
+    setError(null);
 
-    // クライアントを動的 import して build 時の評価を回避
     const { createClient } = await import("@/lib/supabase/client");
     const supabase = createClient();
 
-    const { error } = await supabase.auth.signInWithOtp({
+    // emailRedirectTo を指定しないことで6桁OTPコードをメール送信
+    const { error: otpError } = await supabase.auth.signInWithOtp({
       email: normalized,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
+      options: { shouldCreateUser: false },
     });
 
-    if (error) {
-      console.error(error);
-      setStatus("idle");
+    setLoading(false);
+
+    if (otpError) {
+      setError("メールの送信に失敗しました。再試行してください。");
       return;
     }
-    setStatus("sent");
+
+    setStep("code");
+    // フォーカスをコード入力欄に移動
+    setTimeout(() => codeRef.current?.focus(), 100);
+  }
+
+  // ── ステップ2: コードを検証 ────────────────────────────────────
+  async function handleVerifyCode(e: React.FormEvent) {
+    e.preventDefault();
+    const token = code.trim().replace(/\s/g, "");
+    if (token.length !== 6) {
+      setError("6桁のコードを入力してください。");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    const { createClient } = await import("@/lib/supabase/client");
+    const supabase = createClient();
+
+    const { error: verifyError } = await supabase.auth.verifyOtp({
+      email: email.trim().toLowerCase(),
+      token,
+      type: "email",
+    });
+
+    setLoading(false);
+
+    if (verifyError) {
+      if (verifyError.message.includes("expired") || verifyError.message.includes("invalid")) {
+        setError("コードが無効または期限切れです。最初からやり直してください。");
+        setStep("email");
+        setCode("");
+      } else {
+        setError("認証に失敗しました。再試行してください。");
+      }
+      return;
+    }
+
+    router.push("/home");
+    router.refresh();
   }
 
   return (
@@ -83,49 +133,31 @@ export default function LoginPage() {
         BOTANICAL SHELF
       </p>
 
-      {status === "sent" ? (
-        <div className="w-full max-w-xs text-center">
-          <p className="text-[13px] mb-3" style={{ color: "var(--ink)" }}>
-            ログインリンクを送りました。
-          </p>
-          <p className="text-[11px]" style={{ color: "var(--ink2)", lineHeight: 1.7 }}>
-            メールをご確認ください。
-            <br />
-            届かない場合は迷惑メールフォルダをご確認ください。
-          </p>
-        </div>
-      ) : status === "denied" ? (
-        <div className="w-full max-w-xs text-center">
-          <p className="text-[13px]" style={{ color: "var(--ink2)" }}>
-            このアプリは招待制です。
-          </p>
-          <button
-            onClick={() => setStatus("idle")}
-            className="mt-4 text-[11px] underline"
-            style={{ color: "var(--ink3)" }}
-          >
-            戻る
-          </button>
-        </div>
-      ) : (
-        <form onSubmit={handleSubmit} className="w-full max-w-xs flex flex-col gap-0">
+      {/* ── ステップ1: メールアドレス入力 ── */}
+      {step === "email" && (
+        <form onSubmit={handleSendCode} className="w-full max-w-xs flex flex-col gap-0">
           <input
             type="email"
             placeholder="メールアドレス"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => { setEmail(e.target.value); setError(null); }}
             required
             className="w-full px-[14px] py-[13px] text-[13px] rounded-[14px] border"
             style={{
               background: "var(--surface)",
-              borderColor: "var(--line)",
+              borderColor: error ? "#c97070" : "var(--line)",
               color: "var(--ink)",
               fontFamily: "var(--font-sans)",
             }}
           />
+          {error && (
+            <p className="text-[11px] mt-[8px] text-center" style={{ color: "#c97070" }}>
+              {error}
+            </p>
+          )}
           <button
             type="submit"
-            disabled={status === "loading"}
+            disabled={loading}
             className="w-full mt-[10px] py-[13px] text-[13px] font-bold rounded-[14px] cursor-pointer disabled:opacity-60"
             style={{
               background: "var(--glaucous)",
@@ -134,16 +166,75 @@ export default function LoginPage() {
               border: "none",
             }}
           >
-            {status === "loading" ? "送信中…" : "ログインリンクを送る"}
+            {loading ? "送信中…" : "確認コードを送る"}
           </button>
           <p
             className="text-[10px] text-center mt-[14px]"
             style={{ color: "var(--ink3)", lineHeight: 1.7 }}
           >
-            このアプリは招待制です。
-            <br />
-            登録済みのメールアドレスにリンクを送信します。
+            このアプリは招待制です。<br />
+            登録済みのメールに6桁のコードを送信します。
           </p>
+        </form>
+      )}
+
+      {/* ── ステップ2: コード入力 ── */}
+      {step === "code" && (
+        <form onSubmit={handleVerifyCode} className="w-full max-w-xs flex flex-col items-center gap-0">
+          <p className="text-[12px] text-center mb-[18px]" style={{ color: "var(--ink2)", lineHeight: 1.7 }}>
+            <b style={{ color: "var(--ink)" }}>{email}</b> に<br />
+            6桁のコードを送りました。<br />
+            メールを確認して入力してください。
+          </p>
+
+          <input
+            ref={codeRef}
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            maxLength={6}
+            placeholder="123456"
+            value={code}
+            onChange={(e) => { setCode(e.target.value.replace(/\D/g, "")); setError(null); }}
+            className="w-full px-[14px] py-[16px] text-[28px] text-center tracking-[.3em] rounded-[14px] border mb-2"
+            style={{
+              background: "var(--surface)",
+              borderColor: error ? "#c97070" : "var(--line)",
+              color: "var(--ink)",
+              fontFamily: "var(--font-serif)",
+              letterSpacing: "0.35em",
+            }}
+            autoComplete="one-time-code"
+          />
+
+          {error && (
+            <p className="text-[11px] mb-[8px] text-center" style={{ color: "#c97070" }}>
+              {error}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading || code.length !== 6}
+            className="w-full py-[13px] text-[13px] font-bold rounded-[14px] cursor-pointer disabled:opacity-60"
+            style={{
+              background: "var(--glaucous)",
+              color: "#10160f",
+              fontFamily: "var(--font-sans)",
+              border: "none",
+            }}
+          >
+            {loading ? "確認中…" : "ログイン"}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => { setStep("email"); setCode(""); setError(null); }}
+            className="mt-[14px] text-[11px] underline"
+            style={{ color: "var(--ink3)", background: "none", border: "none" }}
+          >
+            メールアドレスを変更 / コードを再送する
+          </button>
         </form>
       )}
     </div>
