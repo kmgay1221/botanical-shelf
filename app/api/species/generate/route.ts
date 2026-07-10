@@ -82,23 +82,47 @@ export async function POST(req: NextRequest) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return NextResponse.json({ error: "AI APIキーが設定されていません" }, { status: 500 });
 
-  // Gemini API 呼び出し
+  // Gemini API 呼び出し（429 時は10秒待って1回リトライ）
   const prompt = `${SYSTEM_PROMPT}\n\n# 調査対象\n${query}`;
+  const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+  const GEMINI_BODY = JSON.stringify({
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: { temperature: 0.3, maxOutputTokens: 2000 },
+  });
 
-  try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-      {
+  async function callGemini(): Promise<Response> {
+    const res = await fetch(GEMINI_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: GEMINI_BODY,
+    });
+    if (res.status === 429) {
+      // レート制限 → 10秒待ってリトライ
+      await new Promise((r) => setTimeout(r, 10000));
+      return fetch(GEMINI_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.3, maxOutputTokens: 2000 },
-        }),
-      }
-    );
+        body: GEMINI_BODY,
+      });
+    }
+    return res;
+  }
 
-    if (!res.ok) throw new Error(`Gemini API error: ${res.status}`);
+  try {
+    const res = await callGemini();
+
+    if (res.status === 429) {
+      return NextResponse.json(
+        { error: "AIが混み合っています。しばらく待ってからもう一度お試しください（1分程度）" },
+        { status: 429 }
+      );
+    }
+    if (!res.ok) {
+      const body = await res.text().catch(() => "");
+      console.error(`Gemini API error: ${res.status}`, body);
+      throw new Error(`Gemini API error: ${res.status}`);
+    }
+
     const json = await res.json();
     const text = json.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
 
