@@ -4,6 +4,9 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { speciesSchema } from "@/lib/species-schema";
 import { todayJST } from "@/lib/watering";
 
+// Vercel タイムアウトを60秒に延長（デフォルト10秒では Gemini 応答に不足）
+export const maxDuration = 60;
+
 const RATE_LIMIT = 10; // 1日あたりの最大生成回数
 
 const SYSTEM_PROMPT = `あなたは多肉植物・コーデックス・観葉植物の栽培に精通した園芸リサーチャーです。
@@ -84,7 +87,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -99,8 +102,9 @@ export async function POST(req: NextRequest) {
     const json = await res.json();
     const text = json.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
 
-    // JSONを抽出
-    const match = text.match(/\{[\s\S]*\}/);
+    // JSONを抽出（マークダウンコードブロック ```json ... ``` にも対応）
+    const stripped = text.replace(/```(?:json)?\s*/g, "").replace(/```/g, "");
+    const match = stripped.match(/\{[\s\S]*\}/);
     if (!match) throw new Error("JSONが見つかりませんでした");
 
     const parsed = JSON.parse(match[0]);
