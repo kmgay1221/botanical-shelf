@@ -84,7 +84,7 @@ export async function POST(req: NextRequest) {
 
   // Gemini API 呼び出し（429 時は10秒待って1回リトライ）
   const prompt = `${SYSTEM_PROMPT}\n\n# 調査対象\n${query}`;
-  const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+  const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`;
   const GEMINI_BODY = JSON.stringify({
     contents: [{ parts: [{ text: prompt }] }],
     generationConfig: { temperature: 0.3, maxOutputTokens: 2000 },
