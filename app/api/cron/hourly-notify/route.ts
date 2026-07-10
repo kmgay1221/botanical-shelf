@@ -1,7 +1,12 @@
 /**
  * GET /api/cron/hourly-notify
- * 毎時0分に Vercel Cron から実行される通知処理
  * 詳細設計 §5 に準拠
+ *
+ * 【現在の制限】Vercel Hobby プランは Cron が1日1回まで。
+ * vercel.json のスケジュールを "0 22 * * *"（UTC 22:00 = JST 翌7:00）に設定しており、
+ * 全ユーザーへの通知が朝7時固定になっている。
+ * Pro プランへアップグレードすれば "0 * * * *"（毎時）に戻すことで
+ * profiles.notify_hour ごとの個別時刻通知が実現できる。
  */
 
 import { NextRequest, NextResponse } from "next/server";
