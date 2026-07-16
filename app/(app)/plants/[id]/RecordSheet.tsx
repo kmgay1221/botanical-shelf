@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import { BottomSheet } from "@/components/BottomSheet";
+import { Spinner } from "@/components/Spinner";
 import { createClient } from "@/lib/supabase/client";
 import { toJSTDateString } from "@/lib/watering";
 import imageCompression from "browser-image-compression";
@@ -125,7 +126,7 @@ export function RecordSheet({
           <button
             key={a.key}
             onClick={() => setAction(a.key)}
-            className="flex-1 py-[10px] text-center text-[11px] border-r last:border-r-0"
+            className="btn-press flex-1 py-[10px] text-center text-[11px] border-r last:border-r-0"
             style={{
               borderColor: "var(--line)",
               background: action === a.key ? "var(--glaucous)" : "transparent",
@@ -206,13 +207,14 @@ export function RecordSheet({
       <button
         onClick={handleSave}
         disabled={saving}
-        className="w-full py-[13px] rounded-[14px] text-[13px] font-bold disabled:opacity-60"
+        className="btn-press w-full py-[13px] rounded-[14px] text-[13px] font-bold disabled:opacity-60 flex items-center justify-center gap-[7px]"
         style={{
           background: action === "watering" ? "var(--water)" : "var(--glaucous)",
           color: "#0d1418",
           border: "none",
         }}
       >
+        {saving && <Spinner size={13} color="#0d1418" />}
         {saving ? "保存中…" : `${actionInfo.icon} ${actionInfo.label}を記録`}
       </button>
     </BottomSheet>

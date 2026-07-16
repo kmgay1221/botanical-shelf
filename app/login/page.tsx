@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { Spinner } from "@/components/Spinner";
 
 // アガベロゼット SVG（モックの logo に対応）
 function AgaveLogo() {
@@ -158,7 +159,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-[10px] py-[13px] text-[13px] font-bold rounded-[14px] cursor-pointer disabled:opacity-60"
+            className="btn-press w-full mt-[10px] py-[13px] text-[13px] font-bold rounded-[14px] cursor-pointer disabled:opacity-60 flex items-center justify-center gap-[7px]"
             style={{
               background: "var(--glaucous)",
               color: "#10160f",
@@ -166,6 +167,7 @@ export default function LoginPage() {
               border: "none",
             }}
           >
+            {loading && <Spinner size={13} color="#10160f" />}
             {loading ? "送信中…" : "確認コードを送る"}
           </button>
           <p
@@ -216,7 +218,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading || code.length !== 6}
-            className="w-full py-[13px] text-[13px] font-bold rounded-[14px] cursor-pointer disabled:opacity-60"
+            className="btn-press w-full py-[13px] text-[13px] font-bold rounded-[14px] cursor-pointer disabled:opacity-60 flex items-center justify-center gap-[7px]"
             style={{
               background: "var(--glaucous)",
               color: "#10160f",
@@ -224,13 +226,15 @@ export default function LoginPage() {
               border: "none",
             }}
           >
+            {loading && <Spinner size={13} color="#10160f" />}
             {loading ? "確認中…" : "ログイン"}
           </button>
 
           <button
             type="button"
+            disabled={loading}
             onClick={() => { setStep("email"); setCode(""); setError(null); }}
-            className="mt-[14px] text-[11px] underline"
+            className="btn-press mt-[14px] text-[11px] underline disabled:opacity-60"
             style={{ color: "var(--ink3)", background: "none", border: "none" }}
           >
             メールアドレスを変更 / コードを再送する

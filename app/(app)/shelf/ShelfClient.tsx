@@ -55,7 +55,7 @@ export function ShelfClient({ plants, currentMonth }: ShelfClientProps) {
         </p>
         <Link
           href="/add"
-          className="px-6 py-3 rounded-[14px] text-[13px] font-bold"
+          className="btn-press px-6 py-3 rounded-[14px] text-[13px] font-bold"
           style={{ background: "var(--glaucous)", color: "#10160f" }}
         >
           🪴 植物棚に迎える

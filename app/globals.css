@@ -70,6 +70,28 @@ html, body {
   .ripple-ring { animation: none; }
 }
 
+/* ── ボタン押下フィードバック ───────────────────────────────── */
+.btn-press {
+  transition: transform .12s ease, opacity .12s ease;
+}
+.btn-press:active:not(:disabled) {
+  transform: scale(.96);
+  opacity: .88;
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn-press { transition: none; }
+  .btn-press:active:not(:disabled) { transform: none; opacity: .88; }
+}
+
+/* ── ローディングスピナー ───────────────────────────────────── */
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner-rotate {
+  animation: spin .7s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .spinner-rotate { animation: none; opacity: .6; }
+}
+
 /* ── Safe area padding for PWA ──────────────────────────────── */
 .safe-bottom {
   padding-bottom: max(1rem, env(safe-area-inset-bottom));

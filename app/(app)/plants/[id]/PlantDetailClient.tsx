@@ -10,6 +10,7 @@ import { RhythmBar } from "@/components/RhythmBar";
 import { PlantThumb } from "@/components/PlantThumb";
 import { RecordSheet } from "./RecordSheet";
 import { Toast } from "@/components/Toast";
+import { Spinner } from "@/components/Spinner";
 import { createClient } from "@/lib/supabase/client";
 import {
   calcNextWateringDate,
@@ -45,6 +46,8 @@ export function PlantDetailClient({ plant, currentMonth, userId }: PlantDetailCl
   const [recordSheetOpen, setRecordSheetOpen] = useState(false);
   const [toast, setToast] = useState({ msg: "", visible: false });
   const [logs, setLogs] = useState(plant.care_logs);
+  const [archiving, setArchiving] = useState(false);
+  const [hardDeleting, setHardDeleting] = useState(false);
   const deleteInputRef = useRef<HTMLInputElement>(null);
 
   const { species } = plant;
@@ -83,22 +86,35 @@ export function PlantDetailClient({ plant, currentMonth, userId }: PlantDetailCl
   // 記録削除（E5）
   const handleDeleteLog = useCallback(async (logId: string) => {
     if (!confirm("この記録を削除しますか？")) return;
+    const removed = logs.find((l) => l.id === logId);
+
+    // 楽観的更新: 先にリストから消す
+    setLogs((prev) => prev.filter((l) => l.id !== logId));
+
     const supabase = createClient();
     const { error } = await supabase.from("care_logs").delete().eq("id", logId);
+
     if (error) {
+      // ロールバック
+      if (removed) setLogs((prev) => [removed, ...prev]);
       showToast("削除に失敗しました");
       return;
     }
-    setLogs((prev) => prev.filter((l) => l.id !== logId));
     showToast("記録を削除しました");
     router.refresh();
-  }, [router]);
+  }, [logs, router]);
 
   // アーカイブ
   const handleArchive = useCallback(async () => {
     if (!confirm(`「${plant.nickname}」をアーカイブしますか？`)) return;
+    setArchiving(true);
     const supabase = createClient();
-    await supabase.from("plants").update({ archived: true }).eq("id", plant.id);
+    const { error } = await supabase.from("plants").update({ archived: true }).eq("id", plant.id);
+    if (error) {
+      setArchiving(false);
+      showToast("アーカイブに失敗しました");
+      return;
+    }
     router.push("/shelf");
   }, [plant.id, plant.nickname, router]);
 
@@ -111,6 +127,7 @@ export function PlantDetailClient({ plant, currentMonth, userId }: PlantDetailCl
     }
     if (!confirm("すべての記録と写真が完全に削除されます。復元できません。続けますか？")) return;
 
+    setHardDeleting(true);
     const supabase = createClient();
 
     // Storage 写真削除
@@ -126,7 +143,12 @@ export function PlantDetailClient({ plant, currentMonth, userId }: PlantDetailCl
       if (path) await supabase.storage.from("plant-photos").remove([path]);
     }
 
-    await supabase.from("plants").delete().eq("id", plant.id);
+    const { error } = await supabase.from("plants").delete().eq("id", plant.id);
+    if (error) {
+      setHardDeleting(false);
+      showToast("削除に失敗しました");
+      return;
+    }
     router.push("/shelf");
   }, [plant.id, plant.nickname, plant.photo_url, logs, router]);
 
@@ -211,21 +233,21 @@ export function PlantDetailClient({ plant, currentMonth, userId }: PlantDetailCl
       <div className="flex gap-2 px-[18px] mt-[14px]">
         <button
           onClick={() => setRecordSheetOpen(true)}
-          className="flex-1 py-[11px] rounded-[14px] text-center text-[11.5px] font-bold border"
+          className="btn-press flex-1 py-[11px] rounded-[14px] text-center text-[11.5px] font-bold border"
           style={{ background: "var(--water)", color: "#0d1418", borderColor: "var(--water)" }}
         >
           💧 水やり
         </button>
         <button
           onClick={() => setRecordSheetOpen(true)}
-          className="flex-1 py-[11px] rounded-[14px] text-center text-[11.5px] border"
+          className="btn-press flex-1 py-[11px] rounded-[14px] text-center text-[11.5px] border"
           style={{ background: "var(--surface)", borderColor: "var(--line)", color: "var(--ink)" }}
         >
           🌱 肥料
         </button>
         <button
           onClick={() => setRecordSheetOpen(true)}
-          className="flex-1 py-[11px] rounded-[14px] text-center text-[11.5px] border"
+          className="btn-press flex-1 py-[11px] rounded-[14px] text-center text-[11.5px] border"
           style={{ background: "var(--surface)", borderColor: "var(--line)", color: "var(--ink)" }}
         >
           💡 照射
@@ -284,7 +306,7 @@ export function PlantDetailClient({ plant, currentMonth, userId }: PlantDetailCl
                 </div>
                 <button
                   onClick={() => handleDeleteLog(log.id)}
-                  className="text-[10px] px-2 py-1 rounded-[8px]"
+                  className="btn-press text-[10px] px-2 py-1 rounded-[8px]"
                   style={{ color: "var(--ink3)" }}
                 >
                   削除
@@ -298,14 +320,15 @@ export function PlantDetailClient({ plant, currentMonth, userId }: PlantDetailCl
       {/* 株の操作 */}
       <div className="px-[18px] mt-6 flex flex-col gap-2">
         <Link href={`/add?edit=${plant.id}`}
-          className="w-full py-[11px] rounded-[14px] text-center text-[12.5px] border"
+          className="btn-press w-full py-[11px] rounded-[14px] text-center text-[12.5px] border"
           style={{ background: "var(--surface)", borderColor: "var(--line)", color: "var(--ink)" }}>
           株の情報を編集
         </Link>
-        <button onClick={handleArchive}
-          className="w-full py-[11px] rounded-[14px] text-[12.5px] border"
+        <button onClick={handleArchive} disabled={archiving}
+          className="btn-press w-full py-[11px] rounded-[14px] text-[12.5px] border disabled:opacity-60 flex items-center justify-center gap-[7px]"
           style={{ background: "var(--surface)", borderColor: "var(--line)", color: "var(--ink2)" }}>
-          アーカイブ（推奨）
+          {archiving && <Spinner size={12} color="var(--ink2)" />}
+          {archiving ? "アーカイブ中…" : "アーカイブ（推奨）"}
         </button>
         {/* 完全削除セクション */}
         <div className="rounded-[14px] p-[13px] border mt-2"
@@ -317,13 +340,15 @@ export function PlantDetailClient({ plant, currentMonth, userId }: PlantDetailCl
             ref={deleteInputRef}
             type="text"
             placeholder={plant.nickname}
-            className="w-full px-[12px] py-[9px] rounded-[12px] border text-[12px] mb-2"
+            disabled={hardDeleting}
+            className="w-full px-[12px] py-[9px] rounded-[12px] border text-[12px] mb-2 disabled:opacity-60"
             style={{ background: "var(--bg)", borderColor: "var(--line)", color: "var(--ink)" }}
           />
-          <button onClick={handleHardDelete}
-            className="w-full py-[10px] rounded-[12px] text-[12px]"
+          <button onClick={handleHardDelete} disabled={hardDeleting}
+            className="btn-press w-full py-[10px] rounded-[12px] text-[12px] disabled:opacity-60 flex items-center justify-center gap-[7px]"
             style={{ background: "#2a1010", color: "#c97070", border: "1px solid #3a2020" }}>
-            完全に削除
+            {hardDeleting && <Spinner size={12} color="#c97070" />}
+            {hardDeleting ? "削除中…" : "完全に削除"}
           </button>
         </div>
       </div>

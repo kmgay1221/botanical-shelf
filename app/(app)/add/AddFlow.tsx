@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Placard } from "@/components/Placard";
 import { RhythmBar } from "@/components/RhythmBar";
 import { Chip } from "@/components/Chip";
+import { Spinner } from "@/components/Spinner";
 import { createClient } from "@/lib/supabase/client";
 import imageCompression from "browser-image-compression";
 import type { SpeciesMaster, PlantSize, PlantPlacement } from "@/types/database";
@@ -172,6 +173,7 @@ export function AddFlow({ allSpecies, editPlant, currentMonth, userId }: AddFlow
       router.push(`/plants/${editPlant.id}`);
     } else {
       const { data, error } = await supabase.from("plants").insert({
+        owner_id: userId,
         species_id: selectedSpecies.id,
         nickname: nickname.trim(),
         size,
@@ -226,7 +228,7 @@ export function AddFlow({ allSpecies, editPlant, currentMonth, userId }: AddFlow
             <div
               key={s.id}
               onClick={() => { setSelectedSpecies(s); setStep(3); }}
-              className="rounded-[14px] px-[13px] py-[11px] mb-2 border flex justify-between items-center cursor-pointer"
+              className="btn-press rounded-[14px] px-[13px] py-[11px] mb-2 border flex justify-between items-center cursor-pointer"
               style={{ background: "var(--surface)", borderColor: "var(--line)" }}
             >
               <Placard nameJa={s.name_ja} nameScientific={s.name_scientific} />
@@ -250,9 +252,10 @@ export function AddFlow({ allSpecies, editPlant, currentMonth, userId }: AddFlow
               <button
                 onClick={handleAiGenerate}
                 disabled={aiLoading}
-                className="px-[22px] py-[10px] rounded-[14px] border text-[12px] disabled:opacity-60"
+                className="btn-press px-[22px] py-[10px] rounded-[14px] border text-[12px] disabled:opacity-60 inline-flex items-center gap-[7px]"
                 style={{ background: "transparent", borderColor: "var(--line)", color: "var(--ink2)" }}
               >
+                {aiLoading && <Spinner size={12} color="var(--ink2)" />}
                 {aiLoading ? "調査中…" : "🔍 AIに調べてもらう"}
               </button>
             </div>
@@ -292,7 +295,7 @@ export function AddFlow({ allSpecies, editPlant, currentMonth, userId }: AddFlow
             style={{ background: "var(--surface)", borderColor: "var(--line)" }}>
             {SIZE_OPTIONS.map((o) => (
               <button key={o.key} onClick={() => setPreviewSize(o.key)}
-                className="flex-1 py-[10px] text-[11px] border-r last:border-r-0"
+                className="btn-press flex-1 py-[10px] text-[11px] border-r last:border-r-0"
                 style={{
                   borderColor: "var(--line)",
                   background: previewSize === o.key ? "var(--glaucous)" : "transparent",
@@ -310,12 +313,13 @@ export function AddFlow({ allSpecies, editPlant, currentMonth, userId }: AddFlow
           {aiError && <p className="text-[11px] mb-2 text-center" style={{ color: "var(--sun)" }}>{aiError}</p>}
 
           <button onClick={handleRegisterAi} disabled={aiLoading}
-            className="w-full py-[13px] rounded-[14px] text-[13px] font-bold mb-2 disabled:opacity-60"
+            className="btn-press w-full py-[13px] rounded-[14px] text-[13px] font-bold mb-2 disabled:opacity-60 flex items-center justify-center gap-[7px]"
             style={{ background: "var(--glaucous)", color: "#10160f", border: "none" }}>
+            {aiLoading && <Spinner size={13} color="#10160f" />}
             {aiLoading ? "登録中…" : "この内容で登録する"}
           </button>
-          <button onClick={() => { setStep(1); setAiSpecies(null); }}
-            className="w-full py-[13px] rounded-[14px] border text-[13px]"
+          <button onClick={() => { setStep(1); setAiSpecies(null); }} disabled={aiLoading}
+            className="btn-press w-full py-[13px] rounded-[14px] border text-[13px] disabled:opacity-60"
             style={{ background: "transparent", borderColor: "var(--line)", color: "var(--ink2)" }}>
             条件を変えて再生成
           </button>
@@ -332,7 +336,7 @@ export function AddFlow({ allSpecies, editPlant, currentMonth, userId }: AddFlow
               <Placard nameJa={displaySpecies.name_ja} nameScientific={displaySpecies.name_scientific} />
               {!isEdit && (
                 <button onClick={() => { setStep(1); setSelectedSpecies(null); }}
-                  className="text-[10px]" style={{ color: "var(--ink3)" }}>変更</button>
+                  className="btn-press text-[10px]" style={{ color: "var(--ink3)" }}>変更</button>
               )}
             </div>
           )}
@@ -369,7 +373,7 @@ export function AddFlow({ allSpecies, editPlant, currentMonth, userId }: AddFlow
             style={{ background: "var(--surface)", borderColor: "var(--line)" }}>
             {SIZE_OPTIONS.map((o) => (
               <button key={o.key} onClick={() => setSize(o.key)}
-                className="flex-1 py-[10px] text-[11px] border-r last:border-r-0"
+                className="btn-press flex-1 py-[10px] text-[11px] border-r last:border-r-0"
                 style={{
                   borderColor: "var(--line)",
                   background: size === o.key ? "var(--glaucous)" : "transparent",
@@ -390,7 +394,7 @@ export function AddFlow({ allSpecies, editPlant, currentMonth, userId }: AddFlow
             style={{ background: "var(--surface)", borderColor: "var(--line)" }}>
             {PLACEMENT_OPTIONS.map((o) => (
               <button key={o.key} onClick={() => setPlacement(o.key)}
-                className="flex-1 py-[10px] text-[11px] border-r last:border-r-0"
+                className="btn-press flex-1 py-[10px] text-[11px] border-r last:border-r-0"
                 style={{
                   borderColor: "var(--line)",
                   background: placement === o.key ? "var(--glaucous)" : "transparent",
@@ -413,8 +417,9 @@ export function AddFlow({ allSpecies, editPlant, currentMonth, userId }: AddFlow
           {saveError && <p className="text-[11px] mb-2" style={{ color: "var(--sun)" }}>{saveError}</p>}
 
           <button onClick={handleSave} disabled={saving}
-            className="w-full py-[13px] rounded-[14px] text-[13px] font-bold disabled:opacity-60"
+            className="btn-press w-full py-[13px] rounded-[14px] text-[13px] font-bold disabled:opacity-60 flex items-center justify-center gap-[7px]"
             style={{ background: "var(--glaucous)", color: "#10160f", border: "none" }}>
+            {saving && <Spinner size={13} color="#10160f" />}
             {saving ? "保存中…" : isEdit ? "変更を保存" : "🪴 植物棚に迎える"}
           </button>
         </div>

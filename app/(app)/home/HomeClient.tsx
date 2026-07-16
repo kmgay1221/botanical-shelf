@@ -8,6 +8,7 @@ import { Placard } from "@/components/Placard";
 import { DoneButton } from "@/components/DoneButton";
 import { Chip } from "@/components/Chip";
 import { Toast } from "@/components/Toast";
+import { Spinner } from "@/components/Spinner";
 import { createClient } from "@/lib/supabase/client";
 import { toJSTDateString, todayJST } from "@/lib/watering";
 import type { TodayTarget } from "@/lib/watering";
@@ -42,6 +43,7 @@ export function HomeClient({
 }: HomeClientProps) {
   const router = useRouter();
   const [completedIds, setCompletedIds] = useState<Set<string>>(new Set());
+  const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
   const [toast, setToast] = useState<{ msg: string; visible: boolean }>({ msg: "", visible: false });
   const [isPending, startTransition] = useTransition();
 
@@ -66,8 +68,25 @@ export function HomeClient({
 
   const handleComplete = useCallback(
     async (plantId: string) => {
+      // 楽観的更新: DB応答を待たずに先に完了表示・二重タップを防止
+      setCompletedIds((prev) => new Set([...prev, plantId]));
+      setPendingIds((prev) => new Set([...prev, plantId]));
+
       const supabase = createClient();
       const today = todayJST();
+
+      const clearPending = () =>
+        setPendingIds((prev) => {
+          const n = new Set(prev);
+          n.delete(plantId);
+          return n;
+        });
+      const rollback = () =>
+        setCompletedIds((prev) => {
+          const n = new Set(prev);
+          n.delete(plantId);
+          return n;
+        });
 
       // 同日2回目チェック
       const { data: existing } = await supabase
@@ -82,11 +101,8 @@ export function HomeClient({
       if (existing && existing.length > 0) {
         // E3: 同日2回目の確認
         if (!confirm("今日は記録済みです。もう一度記録しますか？")) {
-          setCompletedIds((prev) => {
-            const n = new Set(prev);
-            n.delete(plantId);
-            return n;
-          });
+          clearPending();
+          rollback();
           return;
         }
       }
@@ -97,16 +113,13 @@ export function HomeClient({
         logged_at: new Date().toISOString(),
       });
 
+      clearPending();
+
       if (error) {
         showToast("記録に失敗しました。再試行してください");
-        setCompletedIds((prev) => {
-          const n = new Set(prev);
-          n.delete(plantId);
-          return n;
-        });
+        rollback();
       } else {
         showToast("水やりを記録しました 💧");
-        setCompletedIds((prev) => new Set([...prev, plantId]));
       }
     },
     []
@@ -120,7 +133,12 @@ export function HomeClient({
 
     const supabase = createClient();
     const now = new Date().toISOString();
+    const pendingPlantIds = pending.map((t) => t.plant.id);
     const failed: string[] = [];
+
+    // 楽観的更新: 対象をまとめて先に完了表示
+    setCompletedIds((prev) => new Set([...prev, ...pendingPlantIds]));
+    setPendingIds((prev) => new Set([...prev, ...pendingPlantIds]));
 
     startTransition(async () => {
       for (const target of pending) {
@@ -131,9 +149,17 @@ export function HomeClient({
         });
         if (error) {
           failed.push(target.plant.nickname);
-        } else {
-          setCompletedIds((prev) => new Set([...prev, target.plant.id]));
+          setCompletedIds((prev) => {
+            const n = new Set(prev);
+            n.delete(target.plant.id);
+            return n;
+          });
         }
+        setPendingIds((prev) => {
+          const n = new Set(prev);
+          n.delete(target.plant.id);
+          return n;
+        });
       }
 
       if (failed.length > 0) {
@@ -192,13 +218,14 @@ export function HomeClient({
         <button
           onClick={handleCompleteAll}
           disabled={isPending}
-          className="w-full py-[11px] rounded-[14px] text-[13px] font-bold mb-4 disabled:opacity-60"
+          className="btn-press w-full py-[11px] rounded-[14px] text-[13px] font-bold mb-4 disabled:opacity-60 flex items-center justify-center gap-[7px]"
           style={{
             background: "var(--water)",
             color: "#0d1418",
             border: "none",
           }}
         >
+          {isPending && <Spinner size={13} color="#0d1418" />}
           今日の分をすべて完了 ({pendingCount}株)
         </button>
       )}
@@ -213,7 +240,7 @@ export function HomeClient({
               ＋から最初の一株を迎えましょう
             </p>
             <Link href="/add"
-              className="inline-block px-[22px] py-[10px] rounded-[14px] text-[12px] font-bold"
+              className="btn-press inline-block px-[22px] py-[10px] rounded-[14px] text-[12px] font-bold"
               style={{ background: "var(--glaucous)", color: "#10160f" }}>
               株を追加する
             </Link>
@@ -234,11 +261,13 @@ export function HomeClient({
           {todayTargets.map((target) => {
             const plant = target.plant as PlantWithData;
             const isDone = completedIds.has(plant.id);
+            const isRowPending = pendingIds.has(plant.id);
             return (
               <TaskCard
                 key={plant.id}
                 target={target}
                 isDone={isDone}
+                isPending={isRowPending}
                 onComplete={handleComplete}
               />
             );
@@ -308,10 +337,12 @@ export function HomeClient({
 function TaskCard({
   target,
   isDone,
+  isPending,
   onComplete,
 }: {
   target: TodayTarget;
   isDone: boolean;
+  isPending: boolean;
   onComplete: (id: string) => void;
 }) {
   const plant = target.plant as PlantWithData;
@@ -348,7 +379,8 @@ function TaskCard({
       </div>
       <DoneButton
         plantId={plant.id}
-        alreadyDone={isDone}
+        done={isDone}
+        pending={isPending}
         onComplete={onComplete}
       />
     </div>

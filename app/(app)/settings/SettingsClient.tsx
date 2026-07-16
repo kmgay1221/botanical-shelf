@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { Spinner } from "@/components/Spinner";
 import type { Profile } from "@/types/database";
 
 interface SettingsClientProps {
@@ -18,6 +19,8 @@ export function SettingsClient({ profile, isIos }: SettingsClientProps) {
   const [locationName, setLocationName] = useState(profile.location_name ?? "東京");
   const [saving, setSaving] = useState(false);
   const [pushStatus, setPushStatus] = useState<"idle" | "requesting" | "denied" | "unsupported">("idle");
+  const [notifyToggling, setNotifyToggling] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   // 地域検索
   const [locationQuery, setLocationQuery] = useState("");
@@ -34,8 +37,17 @@ export function SettingsClient({ profile, isIos }: SettingsClientProps) {
 
   // ─── 通知トグル（Web Push 購読 ON/OFF） ─────────────────────────
   async function handleToggleNotify() {
+    if (notifyToggling) return;
     const next = !notifyEnabled;
+    setNotifyToggling(true);
+    try {
+      await doToggleNotify(next);
+    } finally {
+      setNotifyToggling(false);
+    }
+  }
 
+  async function doToggleNotify(next: boolean) {
     if (next) {
       // 通知をONにする → ブラウザの許可を求めてから購読
       if (!("Notification" in window) || !("serviceWorker" in navigator)) {
@@ -141,6 +153,8 @@ export function SettingsClient({ profile, isIos }: SettingsClientProps) {
   }
 
   async function handleLogout() {
+    if (loggingOut) return;
+    setLoggingOut(true);
     const supabase = createClient();
     await supabase.auth.signOut();
     router.push("/login");
@@ -165,7 +179,10 @@ export function SettingsClient({ profile, isIos }: SettingsClientProps) {
 
         {/* 水やり通知 */}
         <SettingRow label="水やり通知" sub="今日の対象株をまとめて1通で通知">
-          <Toggle on={notifyEnabled} onToggle={handleToggleNotify} />
+          <div className="flex items-center gap-[8px]">
+            {notifyToggling && <Spinner size={12} color="var(--ink3)" />}
+            <Toggle on={notifyEnabled} onToggle={handleToggleNotify} disabled={notifyToggling} />
+          </div>
         </SettingRow>
 
         {/* E13: 通知拒否・未対応 */}
@@ -209,7 +226,7 @@ export function SettingsClient({ profile, isIos }: SettingsClientProps) {
         <SettingRow label="地域" sub="天気注記に使用（東京デフォルト）">
           <button
             onClick={() => setLocationQuery(locationName)}
-            className="text-[10px] px-[9px] py-[3px] rounded-full border"
+            className="btn-press text-[10px] px-[9px] py-[3px] rounded-full border"
             style={{ color: "var(--ink2)", borderColor: "var(--line)", background: "transparent" }}
           >
             {locationName} ▾
@@ -235,7 +252,7 @@ export function SettingsClient({ profile, isIos }: SettingsClientProps) {
               <button
                 key={`${loc.latitude}-${loc.longitude}`}
                 onClick={() => handleSelectLocation(loc)}
-                className="w-full text-left px-[13px] py-[10px] rounded-[10px] border-b text-[12px]"
+                className="btn-press w-full text-left px-[13px] py-[10px] rounded-[10px] border-b text-[12px]"
                 style={{ borderColor: "var(--line)", color: "var(--ink)" }}
               >
                 {loc.name}
@@ -243,7 +260,7 @@ export function SettingsClient({ profile, isIos }: SettingsClientProps) {
             ))}
             <button
               onClick={() => { setLocationQuery(""); setLocationResults([]); }}
-              className="w-full text-center py-[8px] text-[11px] mt-1"
+              className="btn-press w-full text-center py-[8px] text-[11px] mt-1"
               style={{ color: "var(--ink3)" }}
             >
               キャンセル
@@ -280,10 +297,12 @@ export function SettingsClient({ profile, isIos }: SettingsClientProps) {
 
       <button
         onClick={handleLogout}
-        className="w-full py-[13px] mt-4 rounded-[14px] border text-[13px]"
+        disabled={loggingOut}
+        className="btn-press w-full py-[13px] mt-4 rounded-[14px] border text-[13px] disabled:opacity-60 flex items-center justify-center gap-[7px]"
         style={{ background: "transparent", borderColor: "var(--line)", color: "var(--ink2)" }}
       >
-        ログアウト
+        {loggingOut && <Spinner size={12} color="var(--ink2)" />}
+        {loggingOut ? "ログアウト中…" : "ログアウト"}
       </button>
 
       {saving && (
@@ -326,17 +345,22 @@ function SettingRow({
   );
 }
 
-function Toggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
+function Toggle({ on, onToggle, disabled = false }: { on: boolean; onToggle: () => void; disabled?: boolean }) {
   return (
     <div
-      onClick={onToggle}
-      className="relative cursor-pointer flex-none"
+      role="switch"
+      aria-checked={on}
+      aria-disabled={disabled}
+      onClick={disabled ? undefined : onToggle}
+      className="btn-press relative flex-none"
       style={{
         width: "42px",
         height: "24px",
         borderRadius: "99px",
         background: on ? "var(--glaucous)" : "#2c382f",
         transition: "background .2s",
+        cursor: disabled ? "default" : "pointer",
+        opacity: disabled ? 0.6 : 1,
       }}
     >
       <div
