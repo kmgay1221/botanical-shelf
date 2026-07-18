@@ -14,40 +14,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { todayJST, toJSTDateString, getTodayTargets, getDormancyWakeTargets, calcStreakIncrement } from "@/lib/watering";
 import type { PlantWithLogs } from "@/lib/watering";
 import type { SpeciesMaster } from "@/types/database";
-import webPush from "web-push";
-
-// VAPID 初期化（モジュール評価時に環境変数から読む）
-const vapidPublic = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? "";
-const vapidPrivate = process.env.VAPID_PRIVATE_KEY ?? "";
-const vapidEmail = process.env.VAPID_EMAIL ?? "mailto:admin@example.com";
-
-if (vapidPublic && vapidPrivate) {
-  webPush.setVapidDetails(vapidEmail, vapidPublic, vapidPrivate);
-}
-
-interface PushSubscriptionRow {
-  id: string;
-  endpoint: string;
-  keys: { p256dh: string; auth: string };
-}
-
-async function sendPush(
-  sub: PushSubscriptionRow,
-  payload: { title: string; body: string; url?: string; tag?: string }
-): Promise<boolean> {
-  try {
-    await webPush.sendNotification(
-      { endpoint: sub.endpoint, keys: sub.keys },
-      JSON.stringify({ ...payload, url: payload.url ?? "/home" })
-    );
-    return true;
-  } catch (e: unknown) {
-    const status = (e as { statusCode?: number }).statusCode;
-    if (status === 410 || status === 404) return false; // 無効な購読
-    console.error("push send error:", e);
-    return true; // その他のエラーは購読は残す
-  }
-}
+import { sendPush, type PushSubscriptionRow } from "@/lib/push";
 
 export async function GET(req: NextRequest) {
   // CRON_SECRET 検証
@@ -144,26 +111,32 @@ export async function GET(req: NextRequest) {
           .select("id, endpoint, keys")
           .eq("user_id", profile.id);
 
+        let dailySent = false;
         for (const sub of subs ?? []) {
           const ok = await sendPush(sub as PushSubscriptionRow, {
             title: "植物棚 🪴",
             body,
             tag: "daily",
           });
-          if (!ok) {
+          if (ok) {
+            dailySent = true;
+          } else {
             // 410 Gone → 購読削除
             await service.from("push_subscriptions").delete().eq("id", sub.id);
           }
         }
 
-        // ⑦ 通知ログを記録
-        await service.from("notification_logs").insert({
-          user_id: profile.id,
-          kind: "daily",
-          sent_on: today,
-        });
-
-        notified++;
+        // ⑦ 通知ログを記録（実際に1件以上送信できた時のみ。
+        // 購読が0件/全滅の日に「送信済み」を記録すると、後で購読しても
+        // その日は二度と再送されなくなるため）
+        if (dailySent) {
+          await service.from("notification_logs").insert({
+            user_id: profile.id,
+            kind: "daily",
+            sent_on: today,
+          });
+          notified++;
+        }
       }
 
       // ⑧ 断水明け通知（notify_dormancy_wake がONのユーザーのみ）
@@ -186,6 +159,7 @@ export async function GET(req: NextRequest) {
             .select("id, endpoint, keys")
             .eq("user_id", profile.id);
 
+          let wakeSent = false;
           for (const sub of subs ?? []) {
             const ok = await sendPush(sub as PushSubscriptionRow, {
               title: "植物棚 🌱",
@@ -193,18 +167,21 @@ export async function GET(req: NextRequest) {
               url: `/plants/${plant.id}`,
               tag: `dormancy-wake-${plant.id}`,
             });
-            if (!ok) {
+            if (ok) {
+              wakeSent = true;
+            } else {
               await service.from("push_subscriptions").delete().eq("id", sub.id);
             }
           }
 
-          await service.from("notification_logs").insert({
-            user_id: profile.id,
-            kind: "dormancy_wake",
-            sent_on: today,
-          });
-
-          dormancyWakeSent++;
+          if (wakeSent) {
+            await service.from("notification_logs").insert({
+              user_id: profile.id,
+              kind: "dormancy_wake",
+              sent_on: today,
+            });
+            dormancyWakeSent++;
+          }
         }
       }
 

@@ -18,7 +18,7 @@ export function SettingsClient({ profile, isIos }: SettingsClientProps) {
   const [notifyDormancy, setNotifyDormancy] = useState(profile.notify_dormancy_wake ?? true);
   const [locationName, setLocationName] = useState(profile.location_name ?? "東京");
   const [saving, setSaving] = useState(false);
-  const [pushStatus, setPushStatus] = useState<"idle" | "requesting" | "denied" | "unsupported">("idle");
+  const [pushStatus, setPushStatus] = useState<"idle" | "requesting" | "denied" | "unsupported" | "failed">("idle");
   const [notifyToggling, setNotifyToggling] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
 
@@ -77,11 +77,20 @@ export function SettingsClient({ profile, isIos }: SettingsClientProps) {
           keys: { p256dh: string; auth: string };
         };
 
-        await fetch("/api/push/subscribe", {
+        const subscribeRes = await fetch("/api/push/subscribe", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(subJson),
         });
+        if (!subscribeRes.ok) {
+          // サーバー側の保存に失敗（DBエラー・認証切れ等）→ ここで検知しないと
+          // ブラウザの購読だけ成立してトグルはONに見えるのに push_subscriptions には
+          // 何も残らず、通知が一切届かない状態になる
+          const body = await subscribeRes.json().catch(() => ({}));
+          console.error("push subscribe API error:", body.error ?? subscribeRes.status);
+          setPushStatus("failed");
+          return;
+        }
       } catch (e) {
         console.error("push subscribe error:", e);
         setPushStatus("denied");
@@ -162,6 +171,7 @@ export function SettingsClient({ profile, isIos }: SettingsClientProps) {
 
   const showPushDenied = pushStatus === "denied";
   const showPushUnsupported = pushStatus === "unsupported";
+  const showPushFailed = pushStatus === "failed";
 
   return (
     <div className="px-[18px] pb-8 pt-3">
@@ -199,6 +209,12 @@ export function SettingsClient({ profile, isIos }: SettingsClientProps) {
           <div className="rounded-[12px] px-[13px] py-[10px] mb-1 text-[11px] leading-[1.7]"
             style={{ background: "#1a1a1a", color: "var(--ink2)" }}>
             このブラウザは通知に対応していません。アプリ内の「今日の水やり」リストをご確認ください。
+          </div>
+        )}
+        {showPushFailed && (
+          <div className="rounded-[12px] px-[13px] py-[10px] mb-1 text-[11px] leading-[1.7]"
+            style={{ background: "#1e1a14", color: "var(--sun)" }}>
+            通知の許可は得られましたが、購読の保存に失敗しました。もう一度トグルを操作してください。
           </div>
         )}
 
