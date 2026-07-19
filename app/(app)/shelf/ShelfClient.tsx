@@ -153,6 +153,7 @@ function PlantCard({
           </div>
           <PlantThumb
             photoUrl={plant.photo_url}
+            thumbUrl={plant.photo_thumb_url}
             category={species.category}
             speciesId={species.id}
             isDormant={dormant}

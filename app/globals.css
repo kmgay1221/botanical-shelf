@@ -92,6 +92,19 @@ html, body {
   .spinner-rotate { animation: none; opacity: .6; }
 }
 
+/* ── スケルトンUI(loading.tsx) ──────────────────────────────── */
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: .55; }
+  50%      { opacity: .9; }
+}
+.skeleton {
+  background: var(--line);
+  animation: skeleton-pulse 1.8s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton { animation: none; opacity: .7; }
+}
+
 /* ── Safe area padding for PWA ──────────────────────────────── */
 .safe-bottom {
   padding-bottom: max(1rem, env(safe-area-inset-bottom));

@@ -120,9 +120,12 @@ export function HomeClient({
         rollback();
       } else {
         showToast("水やりを記録しました 💧");
+        // クライアントキャッシュ(staleTimes)が有効な間に再訪しても完了状態が
+        // 巻き戻らないよう、成功時はこのルートのキャッシュを更新しておく
+        router.refresh();
       }
     },
-    []
+    [router]
   );
 
   const handleCompleteAll = useCallback(async () => {
@@ -167,8 +170,9 @@ export function HomeClient({
       } else {
         showToast(`${pending.length}株の水やりを記録しました 💧`);
       }
+      router.refresh();
     });
-  }, [todayTargets, completedIds]);
+  }, [todayTargets, completedIds, router]);
 
   const pendingCount = todayTargets.filter((t) => !completedIds.has(t.plant.id)).length;
 
@@ -364,6 +368,7 @@ function TaskCard({
     >
       <PlantThumb
         photoUrl={plant.photo_url}
+        thumbUrl={plant.photo_thumb_url}
         category={species.category}
         speciesId={species.id}
         className="w-[58px] h-[58px] flex-none"
@@ -398,6 +403,7 @@ function SeedlingCard({ plant }: { plant: PlantWithData }) {
     >
       <PlantThumb
         photoUrl={plant.photo_url}
+        thumbUrl={plant.photo_thumb_url}
         category={plant.species.category}
         speciesId={plant.species.id}
         className="w-[58px] h-[58px] flex-none"
@@ -423,6 +429,7 @@ function DormantCard({ plant }: { plant: PlantWithData }) {
     >
       <PlantThumb
         photoUrl={plant.photo_url}
+        thumbUrl={plant.photo_thumb_url}
         category={plant.species.category}
         speciesId={plant.species.id}
         isDormant

@@ -25,9 +25,10 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // getClaims() は非対称鍵JWTをローカル検証するためgetUser()と違いAuthサーバーへ毎回往復しない。
+  // ここはルート入口の足切りに過ぎず、実データアクセスの正当性は各層がgetUser()で別途担保する
+  const { data } = await supabase.auth.getClaims();
+  const user = data?.claims;
 
   const pathname = request.nextUrl.pathname;
   const isProtected =

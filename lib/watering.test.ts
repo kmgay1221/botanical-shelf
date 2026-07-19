@@ -38,6 +38,7 @@ function makePlant(overrides: Partial<Plant> = {}): Plant {
     nickname: "白鯨",
     size: "large",
     photo_url: null,
+    photo_thumb_url: null,
     registered_at: "2024-01-01",
     placement: "outdoor",
     memo: null,

@@ -60,6 +60,7 @@ export function AddFlow({ allSpecies, editPlant, currentMonth, userId }: AddFlow
   const [placement, setPlacement] = useState<PlantPlacement>(editPlant?.placement ?? "balcony");
   const [memo, setMemo] = useState(editPlant?.memo ?? "");
   const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoThumbFile, setPhotoThumbFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(editPlant?.photo_url ?? null);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -82,7 +83,13 @@ export function AddFlow({ allSpecies, editPlant, currentMonth, userId }: AddFlow
     const compressed = await imageCompression(file, {
       maxWidthOrHeight: 1080, initialQuality: 0.8, maxSizeMB: 0.3, fileType: "image/webp",
     });
+    // 棚/ホームの一覧はサムネイル程度のサイズしか使わないため、
+    // 別途200px程度の軽量版を生成して配信バイト数とオリジン負荷を減らす
+    const thumb = await imageCompression(file, {
+      maxWidthOrHeight: 200, initialQuality: 0.7, maxSizeMB: 0.05, fileType: "image/webp",
+    });
     setPhotoFile(compressed);
+    setPhotoThumbFile(thumb);
     setPhotoPreview(URL.createObjectURL(compressed));
   }
 
@@ -151,12 +158,24 @@ export function AddFlow({ allSpecies, editPlant, currentMonth, userId }: AddFlow
     const supabase = createClient();
 
     let photoUrl: string | null = editPlant?.photo_url ?? null;
+    let photoThumbUrl: string | null = editPlant?.photo_thumb_url ?? null;
 
     if (photoFile) {
-      const path = `${userId}/${editPlant?.id ?? "tmp"}/${crypto.randomUUID()}.webp`;
+      const id = crypto.randomUUID();
+      const path = `${userId}/${editPlant?.id ?? "tmp"}/${id}.webp`;
       const { error } = await supabase.storage.from("plant-photos").upload(path, photoFile, { contentType: "image/webp" });
       if (!error) {
         photoUrl = supabase.storage.from("plant-photos").getPublicUrl(path).data.publicUrl;
+      }
+
+      if (photoThumbFile) {
+        const thumbPath = `${userId}/${editPlant?.id ?? "tmp"}/${id}_thumb.webp`;
+        const { error: thumbError } = await supabase.storage
+          .from("plant-photos")
+          .upload(thumbPath, photoThumbFile, { contentType: "image/webp" });
+        photoThumbUrl = thumbError
+          ? null
+          : supabase.storage.from("plant-photos").getPublicUrl(thumbPath).data.publicUrl;
       }
     }
 
@@ -167,6 +186,7 @@ export function AddFlow({ allSpecies, editPlant, currentMonth, userId }: AddFlow
         placement,
         memo: memo.trim() || null,
         photo_url: photoUrl,
+        photo_thumb_url: photoThumbUrl,
         species_id: selectedSpecies.id,
       }).eq("id", editPlant.id);
       if (error) { setSaveError("保存に失敗しました"); setSaving(false); return; }
@@ -180,6 +200,7 @@ export function AddFlow({ allSpecies, editPlant, currentMonth, userId }: AddFlow
         placement,
         memo: memo.trim() || null,
         photo_url: photoUrl,
+        photo_thumb_url: photoThumbUrl,
         registered_at: new Date().toISOString().split("T")[0],
       }).select().single();
       if (error) { setSaveError("保存に失敗しました"); setSaving(false); return; }

@@ -61,6 +61,8 @@ export interface Plant {
   nickname: string;
   size: PlantSize;
   photo_url: string | null;
+  /** 一覧(棚/ホーム)用の軽量サムネイル。未設定時は photo_url をリサイズ表示 */
+  photo_thumb_url: string | null;
   registered_at: string;
   placement: PlantPlacement;
   memo: string | null;

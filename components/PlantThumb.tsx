@@ -12,6 +12,8 @@ import type { SpeciesCategory } from "@/types/database";
 
 interface PlantThumbProps {
   photoUrl?: string | null;
+  /** 一覧(棚/ホーム)用の軽量サムネイル。指定時はこちらを優先して配信バイト数を減らす */
+  thumbUrl?: string | null;
   category: SpeciesCategory;
   speciesId?: string;
   isDormant?: boolean;
@@ -24,6 +26,7 @@ interface PlantThumbProps {
 
 export function PlantThumb({
   photoUrl,
+  thumbUrl,
   category,
   speciesId = "",
   isDormant = false,
@@ -31,6 +34,7 @@ export function PlantThumb({
   className = "",
   sizes = "(max-width: 480px) 45vw, 220px",
 }: PlantThumbProps) {
+  const src = thumbUrl ?? photoUrl;
   return (
     <div
       className={`relative rounded-[14px] overflow-hidden flex items-center justify-center ${className}`}
@@ -39,9 +43,9 @@ export function PlantThumb({
       }}
     >
       {/* 植物写真 or カテゴリSVG */}
-      {photoUrl ? (
+      {src ? (
         <Image
-          src={photoUrl}
+          src={src}
           alt="植物写真"
           fill
           sizes={sizes}
