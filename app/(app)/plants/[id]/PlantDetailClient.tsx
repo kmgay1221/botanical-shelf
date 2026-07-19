@@ -179,7 +179,7 @@ export function PlantDetailClient({ plant, currentMonth, userId }: PlantDetailCl
       <div className="relative mx-[18px] rounded-[20px] overflow-hidden h-[230px] mb-[14px]"
         style={{ background: "radial-gradient(circle at 50% 20%, #243129, #151c17 70%)" }}>
         {plant.photo_url ? (
-          <Image src={plant.photo_url} alt={plant.nickname} fill className="object-cover"
+          <Image src={plant.photo_url} alt={plant.nickname} fill sizes="(max-width: 480px) 100vw, 480px" className="object-cover"
             style={dormant ? { filter: "grayscale(.5) brightness(.55)" } : undefined}
           />
         ) : (
@@ -189,6 +189,7 @@ export function PlantDetailClient({ plant, currentMonth, userId }: PlantDetailCl
             speciesId={species.id}
             isDormant={dormant}
             className="w-full h-full"
+            sizes="(max-width: 480px) 100vw, 480px"
           />
         )}
         <div className="absolute top-[12px] left-[12px] text-[10px] tracking-[.16em] px-[9px] py-[3px] rounded-full z-10"
@@ -267,12 +268,12 @@ export function PlantDetailClient({ plant, currentMonth, userId }: PlantDetailCl
           <div className="flex gap-2">
             <div className="flex-1 aspect-square rounded-[14px] overflow-hidden relative"
               style={{ background: "#151c17" }}>
-              <Image src={photoPairs.oldest} alt="最初の写真" fill className="object-cover" />
+              <Image src={photoPairs.oldest} alt="最初の写真" fill sizes="(max-width: 480px) 50vw, 240px" className="object-cover" />
               <div className="absolute bottom-1 left-2 text-[9px]" style={{ color: "var(--ink3)" }}>最初</div>
             </div>
             <div className="flex-1 aspect-square rounded-[14px] overflow-hidden relative"
               style={{ background: "#151c17" }}>
-              <Image src={photoPairs.newest} alt="最新の写真" fill className="object-cover" />
+              <Image src={photoPairs.newest} alt="最新の写真" fill sizes="(max-width: 480px) 50vw, 240px" className="object-cover" />
               <div className="absolute bottom-1 left-2 text-[9px]" style={{ color: "var(--ink3)" }}>最新</div>
             </div>
           </div>

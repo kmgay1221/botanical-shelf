@@ -2,7 +2,7 @@
  * Supabase データ取得ヘルパー（Server側）
  */
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getAuthUser } from "@/lib/supabase/server";
 import type { Plant, CareLog, Profile, SpeciesMaster } from "@/types/database";
 
 export type PlantWithData = Plant & {
@@ -10,10 +10,17 @@ export type PlantWithData = Plant & {
   care_logs: CareLog[];
 };
 
+/**
+ * 一覧（棚/今日/図鑑）で参照する care_logs は直近の水やり・肥料日の算出のみに使う。
+ * 全履歴を毎回転送するとリスト画面が重くなるため直近分に絞る。
+ * 詳細画面（getPlant）はタイムライン全体・成長ギャラリーで全履歴が必要なので絞らない。
+ */
+const RECENT_LOGS_LIMIT = 30;
+
 /** 認証ユーザーの全株（アーカイブ除く）を種・記録付きで取得 */
 export async function getMyPlants(): Promise<PlantWithData[]> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthUser();
   if (!user) return [];
 
   const { data, error } = await supabase
@@ -25,7 +32,9 @@ export async function getMyPlants(): Promise<PlantWithData[]> {
     `)
     .eq("owner_id", user.id)
     .eq("archived", false)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .order("logged_at", { referencedTable: "care_logs", ascending: false })
+    .limit(RECENT_LOGS_LIMIT, { referencedTable: "care_logs" });
 
   if (error) {
     console.error("getMyPlants:", error);
@@ -38,7 +47,7 @@ export async function getMyPlants(): Promise<PlantWithData[]> {
 /** 特定の株を取得 */
 export async function getPlant(plantId: string): Promise<PlantWithData | null> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthUser();
   if (!user) return null;
 
   const { data, error } = await supabase
@@ -59,7 +68,7 @@ export async function getPlant(plantId: string): Promise<PlantWithData | null> {
 /** 自分のプロフィール取得 */
 export async function getProfile(): Promise<Profile | null> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthUser();
   if (!user) return null;
 
   const { data } = await supabase

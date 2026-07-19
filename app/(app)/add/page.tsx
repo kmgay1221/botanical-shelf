@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { getAllSpecies, getPlant } from "@/lib/data";
 import { todayJST } from "@/lib/watering";
-import { createClient } from "@/lib/supabase/server";
+import { getAuthUser } from "@/lib/supabase/server";
 import { AddFlow } from "./AddFlow";
 
 export default async function AddPage({
@@ -11,13 +11,11 @@ export default async function AddPage({
   searchParams: Promise<{ edit?: string }>;
 }) {
   const { edit } = await searchParams;
-  const [allSpecies, supabase] = await Promise.all([
+  const [allSpecies, user, editPlant] = await Promise.all([
     getAllSpecies(),
-    createClient(),
+    getAuthUser(),
+    edit ? getPlant(edit) : Promise.resolve(null),
   ]);
-  const { data: { user } } = await supabase.auth.getUser();
-
-  const editPlant = edit ? await getPlant(edit) : null;
   const today = todayJST();
   const currentMonth = parseInt(today.split("-")[1], 10);
 

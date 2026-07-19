@@ -18,6 +18,8 @@ interface PlantThumbProps {
   dayCount?: number;
   /** カード/詳細などで使うサイズ（Tailwind class or style） */
   className?: string;
+  /** next/image の sizes（描画コンテキストにより異なるため呼び出し側で指定） */
+  sizes?: string;
 }
 
 export function PlantThumb({
@@ -27,6 +29,7 @@ export function PlantThumb({
   isDormant = false,
   dayCount,
   className = "",
+  sizes = "(max-width: 480px) 45vw, 220px",
 }: PlantThumbProps) {
   return (
     <div
@@ -41,6 +44,7 @@ export function PlantThumb({
           src={photoUrl}
           alt="植物写真"
           fill
+          sizes={sizes}
           className="object-cover"
           style={
             isDormant

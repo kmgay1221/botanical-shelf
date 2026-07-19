@@ -367,6 +367,7 @@ function TaskCard({
         category={species.category}
         speciesId={species.id}
         className="w-[58px] h-[58px] flex-none"
+        sizes="58px"
       />
       <div className="flex-1 min-w-0">
         <Placard nameJa={plant.nickname} nameScientific={species.name_scientific} />
@@ -400,6 +401,7 @@ function SeedlingCard({ plant }: { plant: PlantWithData }) {
         category={plant.species.category}
         speciesId={plant.species.id}
         className="w-[58px] h-[58px] flex-none"
+        sizes="58px"
       />
       <div className="flex-1 min-w-0">
         <Placard nameJa={plant.nickname} nameScientific="seedling" />
@@ -425,6 +427,7 @@ function DormantCard({ plant }: { plant: PlantWithData }) {
         speciesId={plant.species.id}
         isDormant
         className="w-[58px] h-[58px] flex-none"
+        sizes="58px"
       />
       <div className="flex-1 min-w-0">
         <Placard nameJa={plant.nickname} nameScientific={plant.species.name_scientific} isDormant />
