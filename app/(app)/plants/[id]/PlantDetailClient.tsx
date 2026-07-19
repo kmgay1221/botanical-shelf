@@ -169,7 +169,7 @@ export function PlantDetailClient({ plant, currentMonth, userId }: PlantDetailCl
   return (
     <div className="pb-6">
       {/* ← 戻る */}
-      <div className="px-[18px] pt-3 pb-1">
+      <div className="px-[18px] pb-1">
         <Link href="/shelf" className="text-[11px] tracking-[.1em]" style={{ color: "var(--ink3)" }}>
           ← 植物棚
         </Link>
@@ -233,24 +233,27 @@ export function PlantDetailClient({ plant, currentMonth, userId }: PlantDetailCl
       <div className="flex gap-2 px-[18px] mt-[14px]">
         <button
           onClick={() => setRecordSheetOpen(true)}
-          className="btn-press flex-1 py-[11px] rounded-[14px] text-center text-[11.5px] font-bold border"
+          className="btn-press flex-1 py-[10px] rounded-[14px] flex flex-col items-center justify-center gap-[3px] border"
           style={{ background: "var(--water)", color: "#0d1418", borderColor: "var(--water)" }}
         >
-          💧 水やり
+          <span className="text-[30px] leading-none">💧</span>
+          <span className="text-[12px] font-bold">水やり</span>
         </button>
         <button
           onClick={() => setRecordSheetOpen(true)}
-          className="btn-press flex-1 py-[11px] rounded-[14px] text-center text-[11.5px] border"
+          className="btn-press flex-1 py-[10px] rounded-[14px] flex flex-col items-center justify-center gap-[3px] border"
           style={{ background: "var(--surface)", borderColor: "var(--line)", color: "var(--ink)" }}
         >
-          🌱 肥料
+          <span className="text-[30px] leading-none">🌱</span>
+          <span className="text-[12px]">肥料</span>
         </button>
         <button
           onClick={() => setRecordSheetOpen(true)}
-          className="btn-press flex-1 py-[11px] rounded-[14px] text-center text-[11.5px] border"
+          className="btn-press flex-1 py-[10px] rounded-[14px] flex flex-col items-center justify-center gap-[3px] border"
           style={{ background: "var(--surface)", borderColor: "var(--line)", color: "var(--ink)" }}
         >
-          💡 照射
+          <span className="text-[30px] leading-none">💡</span>
+          <span className="text-[12px]">照射</span>
         </button>
       </div>
 

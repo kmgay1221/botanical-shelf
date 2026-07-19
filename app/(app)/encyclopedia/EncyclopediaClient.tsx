@@ -53,7 +53,7 @@ export function EncyclopediaClient({
   };
 
   return (
-    <div className="px-[18px] pb-6 pt-3">
+    <div className="px-[18px] pb-6">
       {/* ヘッダー */}
       <div className="eyebrow mb-1">ENCYCLOPEDIA</div>
       <h2 className="text-[22px] tracking-[.06em]" style={{ fontFamily: "var(--font-serif)" }}>
@@ -108,7 +108,7 @@ export function EncyclopediaClient({
                 style={{ background: "var(--surface)", borderColor: "var(--line)" }}
               >
                 {isOwned && (
-                  <span className="absolute top-[5px] right-[6px] text-[8.5px] tracking-[.08em]"
+                  <span className="absolute top-[5px] right-[6px] text-[9.5px] tracking-[.08em]"
                     style={{ color: "var(--glaucous)" }}>
                     ✓ 収集
                   </span>

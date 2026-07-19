@@ -9,7 +9,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="flex flex-col h-dvh overflow-hidden" style={{ background: "var(--bg)" }}>
-      <main className="flex-1 overflow-y-auto overscroll-contain">
+      <main className="safe-top flex-1 overflow-y-auto overscroll-contain">
         {children}
       </main>
       <BottomNav />

@@ -46,7 +46,7 @@ export default function RootLayout({
       className={`${shipporiMincho.variable} ${zenKakuGothicNew.variable} h-full`}
     >
       <head>
-        <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
       </head>
       <body className="h-full antialiased">
         <SwRegister />

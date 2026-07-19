@@ -65,7 +65,7 @@ export function ShelfClient({ plants, currentMonth }: ShelfClientProps) {
   }
 
   return (
-    <div className="px-[18px] pb-6 pt-3">
+    <div className="px-[18px] pb-6">
       {/* ヘッダー */}
       <div className="eyebrow mb-1">MY COLLECTION</div>
       <h2 className="text-[22px] tracking-[.06em]" style={{ fontFamily: "var(--font-serif)" }}>

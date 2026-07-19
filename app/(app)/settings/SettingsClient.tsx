@@ -174,7 +174,7 @@ export function SettingsClient({ profile, isIos }: SettingsClientProps) {
   const showPushFailed = pushStatus === "failed";
 
   return (
-    <div className="px-[18px] pb-8 pt-3">
+    <div className="px-[18px] pb-8">
       <div className="eyebrow mb-1">SETTINGS</div>
       <h2 className="text-[22px] tracking-[.06em] mb-4" style={{ fontFamily: "var(--font-serif)" }}>
         設定

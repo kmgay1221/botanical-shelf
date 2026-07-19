@@ -96,3 +96,6 @@ html, body {
 .safe-bottom {
   padding-bottom: max(1rem, env(safe-area-inset-bottom));
 }
+.safe-top {
+  padding-top: max(0.75rem, env(safe-area-inset-top));
+}

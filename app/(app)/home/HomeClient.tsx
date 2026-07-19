@@ -173,7 +173,7 @@ export function HomeClient({
   const pendingCount = todayTargets.filter((t) => !completedIds.has(t.plant.id)).length;
 
   return (
-    <div className="px-[18px] pb-6 pt-3">
+    <div className="px-[18px] pb-6">
       {/* ヘッダー */}
       <div className="mb-2">
         <div className="text-[11px] tracking-[.15em]" style={{ color: "var(--ink2)" }}>

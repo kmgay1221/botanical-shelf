@@ -33,10 +33,10 @@ export function BottomNav() {
           <Link
             key={href}
             href={href}
-            className="btn-press flex flex-col items-center text-[9.5px] tracking-[.12em] pb-1 min-w-[44px]"
+            className="btn-press flex flex-col items-center text-[11.5px] tracking-[.12em] pb-1 min-w-[44px]"
             style={{ color: isActive ? "var(--glaucous)" : "var(--ink3)" }}
           >
-            <span className="text-[16px] mb-[3px] block not-italic">{icon}</span>
+            <span className="text-[33px] leading-none mb-[4px] block not-italic">{icon}</span>
             {label}
           </Link>
         );

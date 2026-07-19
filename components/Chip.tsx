@@ -43,7 +43,7 @@ export function Chip({
     <span
       role={onClick ? "button" : undefined}
       onClick={onClick}
-      className={`inline-flex items-center gap-[5px] text-[10px] px-[9px] py-[3px] rounded-full border select-none ${
+      className={`inline-flex items-center gap-[5px] text-[11px] px-[10px] py-[4px] rounded-full border select-none ${
         onClick ? "btn-press cursor-pointer" : ""
       } ${className}`}
       style={

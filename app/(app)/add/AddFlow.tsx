@@ -190,7 +190,7 @@ export function AddFlow({ allSpecies, editPlant, currentMonth, userId }: AddFlow
   const displaySpecies = selectedSpecies ?? aiSpecies;
 
   return (
-    <div className="px-[18px] pb-8 pt-3">
+    <div className="px-[18px] pb-8">
       {/* ヘッダー */}
       <div className="eyebrow mb-1">ADD PLANT</div>
       <h2 className="text-[22px] tracking-[.06em] mb-4" style={{ fontFamily: "var(--font-serif)" }}>
